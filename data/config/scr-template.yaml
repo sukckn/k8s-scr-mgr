@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scr-<SCR-NAME>
+  namespace: <NAMESPACE>
+  labels:
+    app-owner: <APP-OWNER>
+    app.kubernetes.io/name: scr-<SCR-NAME>
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app-owner: <APP-OWNER>
+      app.kubernetes.io/name: scr-<SCR-NAME>
+  template:
+    metadata:
+      labels:
+        app-owner: <APP-OWNER>
+        app.kubernetes.io/name: scr-<SCR-NAME>
+    spec:
+      containers:
+      - name: scr-<SCR-NAME>
+        image: decisioning.azurecr.io/<SCR-NAME>:<SCR-TAG>
+        imagePullPolicy: <IMAGE-PULL-POLICY>
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - name: scr-db-secrets
+          mountPath: /opt/scr/secrets/db
+        env:
+        - name: "Dummy-Env"
+          value: "Info"
+<ENV-VARS>          
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsUser: 1001
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+      restartPolicy: Always
+      securityContext: {}
+      imagePullSecrets:
+      - name: scr-agent-registry-pull-secret
+      volumes:
+      - name: scr-db-secrets
+        secret:
+          secretName: scr-agent-db.secrets
+          items:
+          - key: db.secrets
+            path: db.secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scr-<SCR-NAME>
+  namespace: <NAMESPACE>
+  labels:
+    app-owner: <APP-OWNER>
+    app.kubernetes.io/name: scr-<SCR-NAME>
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: <PORT>
+  selector:
+    app-owner: <APP-OWNER>
+    app.kubernetes.io/name: scr-<SCR-NAME>
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: scr-<SCR-NAME>
+  namespace: <NAMESPACE>
+  labels:
+    app-owner: <APP-OWNER>
+    app.kubernetes.io/name: scr-<SCR-NAME>
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - <HOST>
+    secretName: net-sas-com-app-certs
+  rules:
+  - host: <HOST>
+    http:
+      paths:
+      - path: /<SCR-NAME>
+        pathType: Prefix
+        backend:
+          service:
+            name: scr-<SCR-NAME>
+            port:
+              number: 80
