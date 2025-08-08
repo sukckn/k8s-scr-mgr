@@ -1,0 +1,108 @@
+#############################################################################################################################################
+# This YAML loads container pull-scr into Kubernetes
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# - ensure setting for image is correct and pointing to the correct container image.
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# - run file on server where this yaml is stored: kubectl apply -f pull-scr.yaml
+#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+# Call container: https://<Server>/pull-scr/<endpoint> 
+#############################################################################################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pull-scr
+  namespace: agentic-ai
+  labels:
+    app-owner: viyademo01
+    app.kubernetes.io/name: pull-scr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app-owner: viyademo01
+      app.kubernetes.io/name: pull-scr
+  template:
+    metadata:
+      labels:
+        app-owner: viyademo01
+        app.kubernetes.io/name: pull-scr
+    spec:
+      containers:
+      - name: pull-scr
+        image: ghcr.io/sukckn/pull-scr:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 5000
+          protocol: TCP
+        volumeMounts:
+          - name: kubectl
+            mountPath: /tmp/config
+            subPath: config
+          - name: yaml-template
+            mountPath: /pull-scr/template/scr-template.yaml
+            subPath: template
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsUser: 1001
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+      restartPolicy: Always
+      securityContext: {}
+      volumes:
+        - name: kubectl
+          configMap:
+            name: kubectl-config
+        - name: yaml-template
+          configMap:
+            name: scr-yaml-template
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pull-scr
+  namespace: agentic-ai
+  labels:
+    app-owner: viyademo01
+    app.kubernetes.io/name: pull-scr
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 5000
+  selector:
+    app-owner: viyademo01
+    app.kubernetes.io/name: pull-scr
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pull-scr
+  namespace: agentic-ai
+  labels:
+    app-owner: viyademo01
+    app.kubernetes.io/name: pull-scr
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - ck05-sukckn.net.sas.com
+    secretName: net-sas-com-app-certs
+  rules:
+  - host: ck05-sukckn.net.sas.com
+    http:
+      paths:
+      - path: /pull-scr
+        pathType: Prefix
+        backend:
+          service:
+            name: pull-scr
+            port:
+              number: 80
