@@ -1,5 +1,4 @@
-
-![pull-scr logo]
+!pull-scr logo
 
 # pull-scr
 Service container for SAS Viya to load SAS Container Runtime (SCR) images into Kubernetes.
@@ -16,3 +15,4 @@ For security reasons all SCR containers will get loaded into the same dedicated 
 ## Installation
 
 To install the pull-scr service container follow the steps below.
+
