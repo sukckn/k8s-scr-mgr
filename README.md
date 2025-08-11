@@ -36,7 +36,11 @@ The file *config.cfg* contains the parameters to set for the *pull-scr* instance
 | BASE_URL | This is the base endpoint (root address) of the pull-scr container.<br> If you run several insances of pull-scr you need to assign a unique endpoint per instance.<br>**Note:** Default is */pull-scr*. Only change this value if you run more than on instance.|
 | PORT | The target port for *pull-scr*. |
 | HOST | The external host address under which pull-scr can be reached. Typically this is the host name. |
-| NAMESPACE | This is the dedicated namespace in Kubernetes for with pull-scr is working. E.g.: *scr*
+| NAMESPACE | This is the dedicated namespace in Kubernetes for with pull-scr is working. E.g.: *scr* |
+| LIST_SCR | Switch to enable endpoint */list-scr* <br>This endpoint shows a list of all pod with status in the dedicated namespace <br> Default is False |
+| PULL_SCR | Switch to enable endpoint */pull-scr* <br>This endpoint pulls the image from the docker registry and loads it into the namespace in Kubernetes <br> Default is False |
+| RESTART_SCR | Switch to enable endpoint */restart-scr* <br>This endpoint restart the pod for a docker container <br> Default is False |
+| DELETE_SCR | Switch to enable endpoint */delete-scr* <br>This endpoint deletes the pod and deployment of a SCR container <br> Default is False |
 
 #### Create ConfigMaps<br>
 The Kubernetes command to create a ConfigMap is:<br>
