@@ -42,6 +42,9 @@ spec:
           - name: yaml-template
             mountPath: /pull-scr/template/scr-template.yaml
             subPath: template
+          - name: pull-scr-config
+            mountPath: /pull-scr/app/config.py
+            subPath: config
         securityContext:
           capabilities:
             drop:
@@ -59,6 +62,9 @@ spec:
         - name: yaml-template
           configMap:
             name: scr-yaml-template
+        - name: pull-scr-config
+          configMap:
+            name: pull-scr-config
 ---
 apiVersion: v1
 kind: Service
