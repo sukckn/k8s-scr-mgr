@@ -1,3 +1,4 @@
+#!/bin/bash
 clear
 source venv/bin/activate
 cd ./pull-scr

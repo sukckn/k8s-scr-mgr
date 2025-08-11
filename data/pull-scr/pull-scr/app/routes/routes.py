@@ -12,11 +12,15 @@ def create_blueprint(base_url):
     @bp.route('/', methods=['GET'])
     @bp.route('/ping', methods=['GET'])
     def ping():
-        return jsonify({'message': 'Welcome to the Pull SCR Service (version 0.12)!'}), 200
+        return jsonify({'message': 'Welcome to Pull SCR Service (Version 0.90)!'}), 200
 
 ##########################################################################################
     @bp.route('/pull-scr', methods=['POST'])
     def pull_scr():
+        endpoint_available= current_app.config.get('PULL_SCR', False)
+        if not endpoint_available:
+            return jsonify({'error': 'Endpoint "/pull-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+
         # Get JSON data from the request
         inputData= request.get_json()
 
@@ -101,6 +105,10 @@ def create_blueprint(base_url):
 ##########################################################################################
     @bp.route('/restart-scr', methods=['POST'])
     def restart_scr():
+        endpoint_available= current_app.config.get('RESTART_SCR', False)
+        if not endpoint_available:
+            return jsonify({'error': 'Endpoint "/restart-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+
         # Get JSON data from the request
         inputData= request.get_json()
 
@@ -142,6 +150,10 @@ def create_blueprint(base_url):
 ##########################################################################################
     @bp.route('/list-scr', methods=['GET'])
     def list_scr():
+        endpoint_available= current_app.config.get('LIST_SCR', False)
+        if not endpoint_available:
+            return jsonify({'error': 'Endpoint "/list-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+
         namespace= current_app.config.get('NAMESPACE', 'default')
 
         # Run kubectl to get pods in JSON format
@@ -201,6 +213,10 @@ def create_blueprint(base_url):
 ##########################################################################################
     @bp.route('/delete-scr', methods=['POST'])
     def delete_scr():
+        endpoint_available= current_app.config.get('DELETE_SCR', False)
+        if not endpoint_available:
+            return jsonify({'error': 'Endpoint "/delete-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+
         # Get JSON data from the request
         inputData= request.get_json()
 
