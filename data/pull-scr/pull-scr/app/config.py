@@ -1,5 +1,5 @@
 class Config:
     BASE_URL= '/pull-scr'
-    NAMESPACE= 'agentic-ai'
+    NAMESPACE= 'scr'
     PORT= '8080'
-    HOST= 'ck05-sukckn.net.sas.com'
+    HOST= 'my-server.sas.com'

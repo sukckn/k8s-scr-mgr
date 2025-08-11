@@ -13,7 +13,7 @@ For security reasons all SCR containers will get loaded into the same dedicated 
 
 ## Installation
 ### Namespace
-For security reasons *scr-pull* does works for only one dedicated Kubernetes namespace per instance. All SCRs will be loaded into the same namespace. It different namespaces are requred need to start several instances of *scr-pull*
+For security reasons *pull-scr* does works for only one dedicated Kubernetes namespace per instance. All SCRs will be loaded into the same namespace. It different namespaces are requred need to start several instances of *pull-scr*
 
 If you don't have a dedicated namespace yet, you need to create it. To create namespace *scr* run the below command.
 ```
@@ -21,22 +21,22 @@ kubectl create namespace scr
 ```
 
 ### Create ConfigMaps
-You need to create three ConfigMaps that are required by the *pull-scr* container. On the server from where you access Kubernetes open a command prompt (e.g. using MobaXterm) and create *scr-pull* subdirectory in you home directory.
+You need to create three ConfigMaps that are required by the *pull-scr* container. On the server from where you access Kubernetes open a command prompt (e.g. using MobaXterm) and create *pull-scr* subdirectory in you home directory.
 ```
 cd ~
-mkdir scr-pull
-cd scr-pull
+mkdir pull-scr
+cd pull-scr
 ```
-Copy files [config.cfg](./data/config/config.cfg) and [scr-template.yaml](./data/config/scr-template.yaml) to server directory ```~/scr-pull```.
+Copy files [config.cfg](./data/config/config.cfg) and [scr-template.yaml](./data/config/scr-template.yaml) to server directory ```~/pull-scr```.
 
-#### Set scr-pull configuration
-The file *config.cfg* contains the parameters to set for the *scr-pull* instance. Open file in an editor and set the correct values for the parameters.
+#### Set pull-scr configuration
+The file *config.cfg* contains the parameters to set for the *pull-scr* instance. Open file in an editor and set the correct values for the parameters.
 | *Name* | *Comment* |
 | ---    | ---       |
-| BASE_URL | This is the base endpoint (root address) of the scr-pull container.<br> If you run several insances of scr-pull you need to assign a unique endpoint per instance.<br>**Note:** Default is */pull-scr*. Only change this value if you run more than on instance.|
-| PORT | The target port for *scr-pull*. |
-| HOST | The external host address under which scr-pull can be reached. Typically this is the host name. |
-| NAMESPACE | This is the dedicated namespace in Kubernetes for with scr-pull is working. E.g.: *scr*
+| BASE_URL | This is the base endpoint (root address) of the pull-scr container.<br> If you run several insances of pull-scr you need to assign a unique endpoint per instance.<br>**Note:** Default is */pull-scr*. Only change this value if you run more than on instance.|
+| PORT | The target port for *pull-scr*. |
+| HOST | The external host address under which pull-scr can be reached. Typically this is the host name. |
+| NAMESPACE | This is the dedicated namespace in Kubernetes for with pull-scr is working. E.g.: *scr*
 
 #### Create ConfigMaps<br>
 The Kubernetes command to create a ConfigMap is:<br>
@@ -50,5 +50,25 @@ You also need to create a ConfigMap for the kubectl configuration. Assuming for 
 ```
 kubectl create configmap kubectl-config --from-file=config=$HOME/.kube/config --namespace=scr
 ```
+
+### Load into Kubernetes
+You can now load *pull-scr* into Kubernetes.<br>
+Copy files [pull-scr.yaml](./data/yaml/pull-scr.yaml) and [ns-role.yaml](./data/yaml/ns-role.yaml) to server directory ```~/pull-scr```.
+
+To load *pull-scr* run:
+```
+cd ~/pull-scr
+kubectl apply -f pull-scr.yaml
+```
+> **Note:** The yaml file will load *pull-scr* into namespace *default*. If you would like to load it into a defferent namespace to adjust *pull-scr.yaml* accordingly.
+
+You also need to make sure the correct use rights are set for the namespace. Run file [ns-role](./data/yaml/ns-role.yaml) to set the correct user rights.
+```
+cd ~/pull-scr
+kubectl apply -f ns-role.yaml
+```
+> **Note:** The yaml file will set the user rights for namespace *scr* if you are using a different namespace you need to adjust the yaml file accordingly.
+
+When both file have run successlully check in kubernetes that *pull-scr* ir running.
 
 

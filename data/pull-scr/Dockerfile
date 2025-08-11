@@ -15,4 +15,3 @@ RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 EXPOSE 5000
 ENTRYPOINT ["/pull-scr/start.sh"]
-#ENTRYPOINT ["/bin/bash"]
