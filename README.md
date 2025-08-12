@@ -4,7 +4,7 @@
 `pull-scr` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry but developers may not have direct access to the Kubernetes cluster.
 
 ## Features
-Once deployed, the `pull-scr` container provides a service accessible via custom steps in SAS Studio to:
+Once deployed, the `pull-scr` container provides a service accessible via custom step *ID - Deploy SCR* in SAS Studio to:
 
 - **Load** SCR images into Kubernetes
 - **Restart** launched SCR containers
@@ -45,6 +45,9 @@ The file *config.cfg* contains the parameters to set for the *pull-scr* instance
 | PULL_SCR | Switch to enable endpoint */pull-scr* <br>This endpoint pulls the image from the docker registry and loads it into the namespace in Kubernetes <br> Default is False |
 | RESTART_SCR | Switch to enable endpoint */restart-scr* <br>This endpoint restarts the pod for a docker container <br> Default is False |
 | DELETE_SCR | Switch to enable endpoint */delete-scr* <br>This endpoint deletes the pod and deployment of a SCR container <br> Default is False |
+
+#### scr-template
+scr-template.yaml is the template yaml file to load scr images into Kubernetes. The template is using tokens to generate the required yaml file at run time. You can customize the template file if necessary before loading it into ConfigMaps.
 
 #### Create ConfigMaps<br>
 The Kubernetes command to create a ConfigMap is:<br>
