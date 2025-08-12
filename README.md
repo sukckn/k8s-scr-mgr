@@ -54,14 +54,14 @@ The Kubernetes command to create a ConfigMap is:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```<br>
 E.g.:
 ```
-# Set or change namespace if necessary
+# Change namespace name if necessary
 export PULL_SCR_NAMESPACE="scr"
 kubectl create configmap pull-scr-config --from-file=config=$HOME/pull-scr/pull-scr.config --namespace=$PULL_SCR_NAMESPACE
 kubectl create configmap scr-yaml-template --from-file=template=$HOME/pull-scr/scr-template.yaml --namespace=$PULL_SCR_NAMESPACE
 ```
 You also need to create a ConfigMap for the kubectl configuration. Assuming for kubectl config file is in you default home directory run the following command:
 ```
-kubectl create configmap kubectl-config --from-file=config=$HOME/.kube/config --namespace=scr
+kubectl create configmap kubectl-config --from-file=config=$HOME/.kube/config --namespace=$PULL_SCR_NAMESPACE
 ```
 
 ### Load into Kubernetes
