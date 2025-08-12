@@ -70,7 +70,7 @@ kubectl create configmap kubectl-config --from-file=config=$HOME/.kube/config --
 ### Load into Kubernetes
 #### Pull image secret
 To load *pull-scr* into Kubernetes you need to create a Kubernetes secret to pull the scr image from the docker registry.<br>
-Copy file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to server directory ```~/pull-scr```.
+Copy file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to server directory ```~/pull-scr```.<br>
 Open file in editor and set the pull secret. Replace ```<DOCKER-PULL-SECRET>``` with the connection credentials to your docker registry.<br>
 This example is pulling a docker image from *Azure Docker Registry*<br>
 - Set parameters in the JSON structure below to connect to you your docker registry.
