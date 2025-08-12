@@ -15,6 +15,8 @@ Once deployed, the `pull-scr` container provides a service accessible via custom
 ---
 
 ## Installation Guide
+> :exclamation:**Note**: By default *pull-scr* will be installed into namespace ```default```. The default namespace to load the scr containers is ```scr```. Both namespaces can be changed if necessary.
+
 ### Create a Dedicated Namespace
 `pull-scr` operates within a single Kubernetes namespace per instance. If you require multiple namespaces, you must deploy separate instances of `pull-scr`.
 
