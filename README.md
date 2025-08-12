@@ -18,7 +18,7 @@ Once deployed, the `pull-scr` container provides a service accessible via custom
 ### Create a Dedicated Namespace
 `pull-scr` operates within a single Kubernetes namespace per instance. If you require multiple namespaces, you must deploy separate instances of `pull-scr`.
 
-If you don't have a dedicated namespace yet, you need to create one. To create a namespace named `scr`, run:
+If you don't have a dedicated namespace yet, you need to create one. The default namespace to load the scr images is ```scr```. To create a namespace `scr`, run:
 
 ```
 kubectl create namespace scr
