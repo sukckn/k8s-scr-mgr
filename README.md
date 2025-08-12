@@ -54,7 +54,6 @@ scr-template.yaml is the template yaml file to load scr images into Kubernetes. 
 
 The Kubernetes command to create a ConfigMap is:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```<br>
-E.g.:
 ```
 # Change namespace if necessary
 export PULL_SCR_NAMESPACE="default"
@@ -67,6 +66,68 @@ kubectl create configmap kubectl-config --from-file=config=$HOME/.kube/config --
 ```
 
 ### Load into Kubernetes
+#### Pull image secret
+To load *pull-scr* into Kubernetes you need to create a Kubernetes secret to pull the scr image from the docker registry.<br>
+Copy file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to server directory ```~/pull-scr```.
+Open file in editor and set the pull secret. Replace ```<DOCKER-PULL-SECRET>``` with the connection credentials to your docker registry.<br>
+This example is pulling a docker image from *Azure Docker Registry*<br>
+- Set parameters in the JSON structure below to connect to you your docker registry.
+    ```
+    {
+        "auths": {
+            "<Azure Docker Registry Name>.azurecr.io": {
+                "username": "<Azure Docker Registry User Name>",
+                "password": "<Azure Docker Registry Password>",
+                "auth": "Base64 encode: <Azure Docker Registry User Name>:<Azure Docker Registry Password>"
+            }
+        }
+    }
+    ```
+- First Base64 encode the value for parameter "auth"<br>
+  For example: sasscr:myPassword => Base64 encode: c2Fzc2NyOm15UGFzc3dvcmQ=
+- Set the parameter "auth" value together with other values in JSON structure<br>
+    ```
+    {
+        "auths": {
+            "sasscr.azurecr.io": {
+                "username": "sasscr",
+                "password": "myPassword",
+                "auth": "c2Fzc2NyOm15UGFzc3dvcmQ="
+            }
+        }
+    }
+    ```
+- Base64 encode the the JSON structure<br>
+  ```
+  ewoJImF1dGhzIjogewoJCSJzYXNzY3IuYXp1cmVjci5pbyI6IHsKCQkJInVzZXJuYW1lIjogInNhc3NjciIsCgkJCSJwYXNzd29yZCI6ICJteVBhc3N3b3JkIiwKCQkJImF1dGgiOiAiYzJGemMyTnlPbTE1VUdGemMzZHZjbVE9IgoJCX0KCX0KfQ==
+  ```
+- Use this Base64 encoded string to replace the token \<DOCKER-PULL-SECRET\>
+- See also [Create a Secret based on existing credentials](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#registry-secret-existing-credentials) in Kubernetes documentation
+
+#### Set database secret
+If decision flows in a scr image access a database you need to crerate a database secret.<br>
+Copy file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml) to server directory ```~/pull-scr```.
+Open file in editor and set the database secret. Replace ```<DB-SECRET>``` with the database credentials to cpnnect to the database.<br>
+
+- The connection string to connect to Postgres looks like:<br>
+  connectionstring=DRIVER=SQL; CONOPTS=(DRIVER=POSTGRES; CATALOG=public; UID=MyUID; PWD=MyPWD; SERVER=MyServer.sas.com; PORT=5432; DB=MyDB;)
+
+    > :bulb: **Tip**: After the key word *connectionstring=* you can set the connection credentials you have used to connect to MAS.<br>
+
+- For the installed Postgres database the connection string looks like:
+    ```
+    connectionstring=driver=sql;conopts=((driver=postgres;catalog=public;uid=sas;pwd='lnxsas';server= pg-agentic-ai-postgresql.agentic-ai.svc.cluster.local;port=5431;DB=postgres;))
+    ```
+- Base64 encode the connection string<br>
+  This is the encoded connection string for the installed Postgres database
+    ```
+    Y29ubmVjdGlvbnN0cmluZz1kcml2ZXI9c3FsO2Nvbm9wdHM9KChkcml2ZXI9cG9zdGdyZXM7Y2F0YWxvZz1wdWJsaWM7dWlkPXNhcztwd2Q9J2xueHNhcyc7c2VydmVyPSBwZy1hZ2VudGljLWFpLXBvc3RncmVzcWwuYWdlbnRpYy1haS5zdmMuY2x1c3Rlci5sb2NhbDtwb3J0PTU0MzE7REI9cG9zdGdyZXM7KSk=
+    ```
+- Replace token \<DB-SECRET\> with the encoded connection string
+
+See [Configuring a Database Connection](https://go.documentation.sas.com/doc/en/mascrtcdc/default/mascrtag/n15q5afwsfkjl5n1cfvcn7xz4x22.htm) for information on all supported database.
+
+#### Load *pull-scr* into Kubernetes
 You can now load *pull-scr* into Kubernetes.<br>
 Copy files [pull-scr.yaml](./data/yaml/pull-scr.yaml) and [ns-role.yaml](./data/yaml/ns-role.yaml) to server directory ```~/pull-scr```.
 
