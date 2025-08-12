@@ -31,10 +31,10 @@ cd ~
 mkdir pull-scr
 cd pull-scr
 ```
-Copy files [config.cfg](./data/config/config.cfg) and [scr-template.yaml](./data/config/scr-template.yaml) to server directory ```~/pull-scr```.
+Copy files [pull-scr.config](./data/config/pull-scr.config) and [scr-template.yaml](./data/config/scr-template.yaml) to server directory ```~/pull-scr```.
 
 #### Set pull-scr configuration
-The file *config.cfg* contains the parameters to set for the *pull-scr* instance. Open file in an editor and set the correct values for the parameters.
+The file *pull-scr.config* contains the parameters to set for the *pull-scr* instance. Open file in an editor and set the correct values for the parameters.
 | *Name* | *Comment* |
 | ---    | ---       |
 | BASE_URL | This is the base endpoint (root address) of the pull-scr container.<br> If you run several insances of pull-scr you need to assign a unique endpoint per instance.<br>**Note:** Default is */pull-scr*. Only change this value if you run more than on instance.|
@@ -54,7 +54,7 @@ The Kubernetes command to create a ConfigMap is:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```<br>
 E.g.:
 ```
-kubectl create configmap pull-scr-config --from-file=config=$HOME/pull-scr/app/config.cfg --namespace=scr
+kubectl create configmap pull-scr-config --from-file=config=$HOME/pull-scr/pull-scr.config --namespace=scr
 kubectl create configmap scr-yaml-template --from-file=template=$HOME/pull-scr/template/scr-template.yaml --namespace=scr
 ```
 You also need to create a ConfigMap for the kubectl configuration. Assuming for kubectl config file is in you default home directory run the following command:
