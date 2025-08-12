@@ -59,10 +59,13 @@ Edit the *pull-scr.config* file to set the required parameters for your pull-scr
 The scr-template.yaml file is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
 
 #### 4. Create ConfigMaps
-> :exclamation:**Note**: By default, *pull-scr* is deployed in the default namespace. If you use a different namespace, update the namespace in the commands below and also in the following files:
+> :exclamation:**Note**: By default, *pull-scr* is deployed in the ```default``` namespace. If you use a different namespace, update the namespace in the commands below and also in the following files:
 
 * [pull-scr.yaml](./data/yaml/pull-scr.yaml)
 * [ns-role.yaml](./data/yaml/ns-role.yaml)
+
+Format to create a ConfigMap:<br>
+```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
 
 Use the following commands to create the required ConfigMaps:
 ```
@@ -79,7 +82,8 @@ kubectl create configmap scr-yaml-template \
   --from-file=template=$HOME/pull-scr/scr-template.yaml \
   --namespace=$PULL_SCR_NAMESPACE
 
-# Create ConfigMap for kubectl configuration
+# Create ConfigMap for kubectl configuration. 
+# Assuming the kubectl config file is in default location in the home directory
 kubectl create configmap kubectl-config \
   --from-file=config=$HOME/.kube/config \
   --namespace=$PULL_SCR_NAMESPACE
