@@ -55,7 +55,7 @@ The Kubernetes command to create a ConfigMap is:<br>
 E.g.:
 ```
 # Set or change namespace if necessary
-export PULL_SCR_NAMESPACE="agentic-ai"
+export PULL_SCR_NAMESPACE="scr"
 kubectl create configmap pull-scr-config --from-file=config=$HOME/pull-scr/pull-scr.config --namespace=$PULL_SCR_NAMESPACE
 kubectl create configmap scr-yaml-template --from-file=template=$HOME/pull-scr/scr-template.yaml --namespace=$PULL_SCR_NAMESPACE
 ```
