@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: scr
+  namespace: scr # NAMESPACE for scr container
   name: deployment-manager
 rules:
 - apiGroups: ["apps"]
@@ -18,11 +18,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: deployment-manager-binding
-  namespace: scr
+  namespace: scr # NAMESPACE for scr container
 subjects:
 - kind: ServiceAccount
   name: default
-  namespace: scr
+  namespace: default # NAMESPACE for pull scr
 roleRef:
   kind: Role
   name: deployment-manager

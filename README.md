@@ -50,13 +50,13 @@ The file *pull-scr.config* contains the parameters to set for the *pull-scr* ins
 scr-template.yaml is the template yaml file to load scr images into Kubernetes. The template is using tokens to generate the required yaml file at run time. You can customize the template file if necessary before loading it into ConfigMaps.
 
 #### Create ConfigMaps<br>
-> **Note:** By default *pull-scr* is loaded into namespace ```default```. If you want load it into a different namespace, you need to change the namespace for the *create configmap* commands below and also in the yaml file [pull-scr.yaml](./data/yaml/pull-scr.yaml).
+> **Note:** By default *pull-scr* is loaded into namespace ```default```. If you want load it into a different namespace, you need to change the namespace for the *create configmap* commands below. You also need to adjust the namespace in yaml files [pull-scr.yaml](./data/yaml/pull-scr.yaml) and [ns-role.yaml](./data/yaml/ns-role.yaml)
 
 The Kubernetes command to create a ConfigMap is:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```<br>
 E.g.:
 ```
-# Change namespace name if necessary
+# Change namespace if necessary
 export PULL_SCR_NAMESPACE="default"
 kubectl create configmap pull-scr-config --from-file=config=$HOME/pull-scr/pull-scr.config --namespace=$PULL_SCR_NAMESPACE
 kubectl create configmap scr-yaml-template --from-file=template=$HOME/pull-scr/scr-template.yaml --namespace=$PULL_SCR_NAMESPACE
@@ -75,16 +75,19 @@ To load *pull-scr* run:
 cd ~/pull-scr
 kubectl apply -f pull-scr.yaml
 ```
-> **Note:** The yaml file will load *pull-scr* into namespace *default*. If you would like to load it into a defferent namespace to adjust *pull-scr.yaml* accordingly.
+> **Note:** The yaml file will load *pull-scr* into namespace *default*. If you load it into a defferent namespace to adjust *pull-scr.yaml* accordingly.
 
 You also need to make sure the correct use rights are set for the namespace. Run file [ns-role](./data/yaml/ns-role.yaml) to set the correct user rights.
 ```
 cd ~/pull-scr
 kubectl apply -f ns-role.yaml
 ```
-> **Note:** The yaml file will set the user rights for namespace *scr* if you are using a different namespace you need to adjust the yaml file accordingly.
+> **Note:** The yaml file will set the user rights for *pull-scr* so the service can access the scr namespace correctly. If you don't use the default setting you need to adjust the file.<br>
+>* If you have loaded *pull-scr* into a different namespace you need to adjust the setting *namespace: default*<br>
+>* If you don't use namespace *scr* to load the scr containers you need to adjust setting *namespace: scr*
 
-When both file have run successlully check in kubernetes that *pull-scr* ir running.
+#### Verify pull-scr service
+When both file have run successlully check in kubernetes that *pull-scr* is running.
 
 ### Custom Step 
 To call pull-scr from within SAS Viya you can use the SAS Studio custom step ```ID - Deploy SCR```.
