@@ -15,7 +15,7 @@ Once deployed, the `pull-scr` container provides a service accessible via custom
 ---
 
 ## Installation Guide
-> :exclamation:**Note**: By default *pull-scr* will be installed into namespace ```default```. The default namespace to load the scr containers is ```scr```. Both namespaces can be changed if necessary.
+> ❗**Note**: By default *pull-scr* will be installed into namespace ```default```. The default namespace to load the scr containers is ```scr```. Both namespaces can be changed if necessary.
 
 ### Create a Dedicated Namespace
 `pull-scr` operates within a single Kubernetes namespace per instance. If you require multiple namespaces, you must deploy separate instances of `pull-scr`.
@@ -26,157 +26,195 @@ If you don't have a dedicated namespace yet, you need to create one. The default
 kubectl create namespace scr
 ```
 
-### Create ConfigMaps
-You need to create three ConfigMaps that are required by the *pull-scr* container. On the server from where you access Kubernetes open a command prompt (e.g. using MobaXterm) and create *pull-scr* subdirectory in you home directory.
+### Creating ConfigMaps for pull-scr
+To configure the pull-scr container, you need to create three ConfigMaps. Follow the steps below to prepare your environment and apply the necessary configurations.
+
+---
+#### 1. Prepare the Working Directory
+On the server where you access Kubernetes (e.g., via MobaXterm), open a terminal and create a working directory:
 ```
 cd ~
 mkdir pull-scr
 cd pull-scr
 ```
-Copy files [pull-scr.config](./data/config/pull-scr.config) and [scr-template.yaml](./data/config/scr-template.yaml) to server directory ```~/pull-scr```.
+Copy the following files into the ```~/pull-scr``` directory:
+* [pull-scr.config](./data/config/pull-scr.config)
+* [scr-template.yaml](./data/config/scr-template.yaml)
 
-#### Set pull-scr configuration
-The file *pull-scr.config* contains the parameters to set for the *pull-scr* instance. Open file in an editor and set the correct values for the parameters.
+---
+#### 2. Configure pull-scr
+Edit the *pull-scr.config* file to set the required parameters for your pull-scr instance.
 | *Name* | *Comment* |
 | ---    | ---       |
-| BASE_URL | This is the base endpoint (root address) of the pull-scr container.<br> If you run several insances of pull-scr you need to assign a unique endpoint per instance.<br>**Note:** Default is */pull-scr*. Only change this value if you run more than on instance.|
-| PORT | The target port for *pull-scr*. |
-| HOST | The external host address under which pull-scr can be reached. Typically this is the host name. |
-| NAMESPACE | This is the dedicated namespace in Kubernetes for with pull-scr is working. E.g.: *scr* |
-| LIST_SCR | Switch to enable endpoint */list-scr* <br>This endpoint shows a list of all pod with status in the dedicated namespace <br> Default is False |
-| PULL_SCR | Switch to enable endpoint */pull-scr* <br>This endpoint pulls the image from the docker registry and loads it into the namespace in Kubernetes <br> Default is False |
-| RESTART_SCR | Switch to enable endpoint */restart-scr* <br>This endpoint restarts the pod for a docker container <br> Default is False |
-| DELETE_SCR | Switch to enable endpoint */delete-scr* <br>This endpoint deletes the pod and deployment of a SCR container <br> Default is False |
+| BASE_URL | Base endpoint of the pull-scr container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /pull-scr |
+| PORT | Target port for the *pull-scr* container. |
+| HOST | External host address (typically the hostname) where pull-scr is accessible. |
+| NAMESPACE | Kubernetes namespace dedicated to *pull-scr* (e.g., scr). |
+| LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** False |
+| PULL_SCR | Enables the /pull-scr endpoint to pull and load images from the Docker registry.<br>***Default:*** False |
+| RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** False |
+| DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** False |
 
-#### scr-template
-scr-template.yaml is the template yaml file to load scr images into Kubernetes. The template is using tokens to generate the required yaml file at run time. You can customize the template file if necessary before loading it into ConfigMaps.
+#### 3. Review scr-template.yaml
+The scr-template.yaml file is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
 
-#### Create ConfigMaps<br>
-> **Note:** By default *pull-scr* is loaded into namespace ```default```. If you want load it into a different namespace, you need to change the namespace for the *create configmap* commands below. You also need to adjust the namespace in yaml files [pull-scr.yaml](./data/yaml/pull-scr.yaml) and [ns-role.yaml](./data/yaml/ns-role.yaml)
+#### 4. Create ConfigMaps
+>❗**Note**: By default, *pull-scr* is deployed in the ```default``` namespace. If you use a different namespace, update the namespace in the commands below and also in the following files:
 
-The Kubernetes command to create a ConfigMap is:<br>
-```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```<br>
+* [pull-scr.yaml](./data/yaml/pull-scr.yaml)
+* [ns-role.yaml](./data/yaml/ns-role.yaml)
+
+Format to create a ConfigMap:<br>
+```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
+
+Use the following commands to create the required ConfigMaps:
 ```
-# Change namespace if necessary
+# Set the namespace (change if needed)
 export PULL_SCR_NAMESPACE="default"
-kubectl create configmap pull-scr-config --from-file=config=$HOME/pull-scr/pull-scr.config --namespace=$PULL_SCR_NAMESPACE
-kubectl create configmap scr-yaml-template --from-file=template=$HOME/pull-scr/scr-template.yaml --namespace=$PULL_SCR_NAMESPACE
-```
-You also need to create a ConfigMap for the kubectl configuration. Assuming for kubectl config file is in you default home directory run the following command:
-```
-kubectl create configmap kubectl-config --from-file=config=$HOME/.kube/config --namespace=$PULL_SCR_NAMESPACE
-```
 
+# Create ConfigMap for pull-scr configuration
+kubectl create configmap pull-scr-config \
+  --from-file=config=$HOME/pull-scr/pull-scr.config \
+  --namespace=$PULL_SCR_NAMESPACE
+
+# Create ConfigMap for the SCR template
+kubectl create configmap scr-yaml-template \
+  --from-file=template=$HOME/pull-scr/scr-template.yaml \
+  --namespace=$PULL_SCR_NAMESPACE
+
+# Create ConfigMap for kubectl configuration. 
+# Assuming the kubectl config file is in default location in the home directory
+kubectl create configmap kubectl-config \
+  --from-file=config=$HOME/.kube/config \
+  --namespace=$PULL_SCR_NAMESPACE
+```
 ### Load into Kubernetes
-#### Pull image secret
-To load *pull-scr* into Kubernetes you need to create a Kubernetes secret to pull the scr image from the docker registry.<br>
-Copy file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to server directory ```~/pull-scr```.<br>
-Open file in editor and set the pull secret. Replace ```<DOCKER-PULL-SECRET>``` with the connection credentials to your docker registry.<br>
-This example is pulling a docker image from *Azure Docker Registry*<br>
-- Set parameters in the JSON structure below to connect to you your docker registry.
-    ```
-    {
-        "auths": {
-            "<Azure Docker Registry Name>.azurecr.io": {
+#### 1. Create Image Pull Secret
+To load pull-scr into Kubernetes, you must first create a Kubernetes secret to pull the SCR image from your Docker registry.
+
+1. Copy the file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to the server directory ```~/pull-scr```.
+
+2. Open the file in an editor and replace the placeholder &lt;DOCKER-PULL-SECRET&gt; with your Docker registry credentials.
+
+    **Example: Azure Docker Registry**
+    * Update the JSON structure with your registry details:
+        ```
+        {
+            "auths": {
+                "<Azure Docker Registry Name>.azurecr.io": {
                 "username": "<Azure Docker Registry User Name>",
                 "password": "<Azure Docker Registry Password>",
-                "auth": "Base64 encode: <Azure Docker Registry User Name>:<Azure Docker Registry Password>"
+                "auth": "Base64 encode: <username>:<password>"
+                }
             }
         }
-    }
-    ```
-- First Base64 encode the value for parameter "auth"<br>
-  For example: sasscr:myPassword => Base64 encode: c2Fzc2NyOm15UGFzc3dvcmQ=
-- Set the parameter "auth" value together with other values in JSON structure<br>
-    ```
-    {
-        "auths": {
-            "sasscr.azurecr.io": {
+        ```
+    * Base64 encode the auth value: \<username\>:\<password\>:<br>
+    Example: sasscr:myPassword → Base64 encode:  c2Fzc2NyOm15UGFzc3dvcmQ=
+
+    * Final JSON structure:
+        ```
+        {
+            "auths": {
+                "sasscr.azurecr.io": {
                 "username": "sasscr",
                 "password": "myPassword",
                 "auth": "c2Fzc2NyOm15UGFzc3dvcmQ="
+                }
             }
         }
-    }
+        ```
+    * **Base64 encode** the entire JSON structure:
+        ```
+        ewoJImF1dGhzIjogewoJCSJzYXNzY3IuYXp1cmVjci5pbyI6IHsKCQkJInVzZXJuYW1lIjogInNhc3NjciIsCgkJCSJwYXNzd29yZCI6ICJteVBhc3N3b3JkIiwKCQkJImF1dGgiOiAiYzJGemMyTnlPbTE1VUdGemMzZHZjbVE9IgoJCX0KCX0KfQ==
+        ```
+    * Replace the token &lt;DOCKER-PULL-SECRET&gt; in ```scr-secret-docker.yaml``` with this encoded string.
+
+    📘 Refer to [Kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#registry-secret-existing-credentials) for more details on creating secrets from existing credentials.
+
+3. Register secret in Kubernetes.
     ```
-- Base64 encode the the JSON structure<br>
-  ```
-  ewoJImF1dGhzIjogewoJCSJzYXNzY3IuYXp1cmVjci5pbyI6IHsKCQkJInVzZXJuYW1lIjogInNhc3NjciIsCgkJCSJwYXNzd29yZCI6ICJteVBhc3N3b3JkIiwKCQkJImF1dGgiOiAiYzJGemMyTnlPbTE1VUdGemMzZHZjbVE9IgoJCX0KCX0KfQ==
-  ```
-- Use this Base64 encoded string to replace the token \<DOCKER-PULL-SECRET\>
-- See also [Create a Secret based on existing credentials](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#registry-secret-existing-credentials) in Kubernetes documentation
-
-#### Set database secret
-If decision flows in a scr image access a database you need to crerate a database secret.<br>
-Copy file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml) to server directory ```~/pull-scr```.
-Open file in editor and set the database secret. Replace ```<DB-SECRET>``` with the database credentials to cpnnect to the database.<br>
-
-- The connection string to connect to Postgres looks like:<br>
-  connectionstring=DRIVER=SQL; CONOPTS=(DRIVER=POSTGRES; CATALOG=public; UID=MyUID; PWD=MyPWD; SERVER=MyServer.sas.com; PORT=5432; DB=MyDB;)
-
-    > :bulb: **Tip**: After the key word *connectionstring=* you can set the connection credentials you have used to connect to MAS.<br>
-
-- For the installed Postgres database the connection string looks like:
+    cd ~/pull-scr
+    kubectl apply -f scr-secret-docker.yaml
     ```
-    connectionstring=driver=sql;conopts=((driver=postgres;catalog=public;uid=sas;pwd='lnxsas';server= pg-agentic-ai-postgresql.agentic-ai.svc.cluster.local;port=5431;DB=postgres;))
+---
+#### 2. Create Database Secret
+If the SCR image accesses a database, you must create a database secret. You can skip this step if you are not accessing a database.
+1. Copy the file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml) to ```~/pull-scr```
+
+2. Open the file and replace &lt;DB-SECRET&gt; with your database connection string.
+
+    **Example: PostgreSQL Connection**
+    * Example connection string:
+        ```
+        connectionstring=DRIVER=SQL; CONOPTS=(DRIVER=POSTGRES; CATALOG=public; UID=MyUID; PWD=MyPWD; SERVER=MyServer.sas.com; PORT=5432; DB=MyDB;)
+        ```
+        >💡**Tip:** After the key word *connectionstring=* you can use the same connection string you use with MAS.
+
+    * Base64 encode the connection string:
+        ```
+        Y29ubmVjdGlvbnN0cmluZz1kcml2ZXI9c3FsO2Nvbm9wdHM9KChkcml2ZXI9cG9zdGdyZXM7Y2F0YWxvZz1wdWJsaWM7dWlkPXNhcztwd2Q9J2xueHNhcyc7c2VydmVyPSBwZy1hZ2VudGljLWFpLXBvc3RncmVzcWwuYWdlbnRpYy1haS5zdmMuY2x1c3Rlci5sb2NhbDtwb3J0PTU0MzE7REI9cG9zdGdyZXM7KSk=
+        ```
+
+    * Replace the token &lt;DB-SECRET&gt; in file ```scr-secret-db.yaml``` with this encoded string.
+
+    📘 See [Configuring a Database Connection](https://go.documentation.sas.com/doc/en/mascrtcdc/default/mascrtag/n15q5afwsfkjl5n1cfvcn7xz4x22.htm) for information on all supported databases.
+
+3. Register secret in Kubernetes.
     ```
-- Base64 encode the connection string<br>
-  This is the encoded connection string for the installed Postgres database
+    cd ~/pull-scr
+    kubectl apply -f scr-secret-db.yaml
     ```
-    Y29ubmVjdGlvbnN0cmluZz1kcml2ZXI9c3FsO2Nvbm9wdHM9KChkcml2ZXI9cG9zdGdyZXM7Y2F0YWxvZz1wdWJsaWM7dWlkPXNhcztwd2Q9J2xueHNhcyc7c2VydmVyPSBwZy1hZ2VudGljLWFpLXBvc3RncmVzcWwuYWdlbnRpYy1haS5zdmMuY2x1c3Rlci5sb2NhbDtwb3J0PTU0MzE7REI9cG9zdGdyZXM7KSk=
+---
+#### 3. Deploy pull-scr to Kubernetes
+1. Copy the following files to ```~/pull-scr```:
+    * [pull-scr.yaml](./data/yaml/pull-scr.yaml)
+    * [ns-role.yaml](./data/yaml/ns-role.yaml)
+
+2. Apply the deployment:
+    >❗**Note:** The yaml file will load *pull-scr* into namespace *default*. If you load *pull-scr* into a different namespace you need to **adjust pull-scr.yaml** accordingly.
     ```
-- Replace token \<DB-SECRET\> with the encoded connection string
+    cd ~/pull-scr
+    kubectl apply -f pull-scr.yaml
+    ```
+3. Set namespace permissions:
+    >❗**Note:** *ns-role.yaml* sets user rights for *pull-scr* to access the scr namespace.<br>
+    >* If using a different namespace, update ```namespace: default```
+    >* If SCR containers are loaded into a different namespace than *scr*, update ```namespace: scr``` accordingly
 
-See [Configuring a Database Connection](https://go.documentation.sas.com/doc/en/mascrtcdc/default/mascrtag/n15q5afwsfkjl5n1cfvcn7xz4x22.htm) for information on all supported database.
-
-#### Load *pull-scr* into Kubernetes
-You can now load *pull-scr* into Kubernetes.<br>
-Copy files [pull-scr.yaml](./data/yaml/pull-scr.yaml) and [ns-role.yaml](./data/yaml/ns-role.yaml) to server directory ```~/pull-scr```.
-
-To load *pull-scr* run:
-```
-cd ~/pull-scr
-kubectl apply -f pull-scr.yaml
-```
-> **Note:** The yaml file will load *pull-scr* into namespace *default*. If you load it into a defferent namespace to adjust *pull-scr.yaml* accordingly.
-
-You also need to make sure the correct use rights are set for the namespace. Run file [ns-role](./data/yaml/ns-role.yaml) to set the correct user rights.
-```
-cd ~/pull-scr
-kubectl apply -f ns-role.yaml
-```
-> **Note:** The yaml file will set the user rights for *pull-scr* so the service can access the scr namespace correctly. If you don't use the default setting you need to adjust the file.<br>
->* If you have loaded *pull-scr* into a different namespace you need to adjust the setting *namespace: default*<br>
->* If you don't use namespace *scr* to load the scr containers you need to adjust setting *namespace: scr*
-
-#### Verify pull-scr service
-When both file have run successlully check in kubernetes that *pull-scr* is running.
-
-### Custom Step 
-To call pull-scr from within SAS Viya you can use the SAS Studio custom step ```ID - Deploy SCR```.
-#### Import custom step
-To import ID - Deploy SCR
-* Go to SAS Studio
-* In your home folder (My Folder) create sub-folder *custom steps*
-* Upload [ID - Deploy SCR](./data/custom_step/ID%20-%20Deploy%20SCR.step) into sub-folder
+4. Verify Deployment<br>
+    After applying both files, verify that the *pull-scr* service is running in Kubernetes.
 
 ## ID - Deploy SCR
-To load a SCR container into Kubernetes open step ID - Deploy SCR in SAS Studio (open in tab)
+The **ID - Deploy SCR** custom step allows you to interact with the pull-scr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
 
+🔷 pulling container images, <br>
+🔷 restarting pods, <br>
+🔷 deleting deployments, <br>
+🔷 listing pods in the dedicated Kubernetes namespace.<br>
+
+---
+### Importing the Custom Step
+To import custom step *ID - Deploy SCR*:
+* Open SAS Studio.
+* In your home folder (My Folder), create a sub-folder named ```custom steps```.
+* Upload file [ID - Deploy SCR.step](./data/custom_step/ID%20-%20Deploy%20SCR.step) into the *custom steps* folder.
+
+---
 ### User Interface
 #### Modus
-In this section you switch between the different operations you want to perform.
+Use this section to choose the operation you want to perform:
 
 * **Pull Image**<br>
-With this UI you can load a new SCR image from the Docker registry into Kubernetes
+    Load a new SCR image from the Docker registry into Kubernetes.
 * **Restart** pod<br>
-Use this modus to restart a pod for example when you have published a new version of a SCR to Docker registry
+    Restart a pod, typically after publishing a new version of an SCR image.
 * **Delete deployment**<br>
-Use this modus if you need to delete a SCR deployment from Kubernetes
+    Remove an SCR deployment from Kubernetes.
 * **Get list of pods in namespace**<br>
-Use this modus to receive a list of pods in the dedicated namespace with status and age imformation
+    Retrieve a list of pods in the *scr-pull* namespace, including status and age information.
 
-![](./images/pull-image.jpg)
+    ![](./images/pull-image.jpg)
 
 #### Pull image
 * **Container Image Name**<br>
@@ -202,7 +240,9 @@ Set the number of environment variables you want to set for the scr container
     * **Value**<br>
     Environment variable value
 
-> **Note:** The created deployment and pod in Kubernetes are prefixed with ```scr-``` followed by the scr image name. E.g. if the scr image is called *my-id-flow*, the deploment and pod are called *scr-my-id-flow*
+>❗**Note:** The deployment and pod created in Kubernetes are prefixed with **scr-** followed by the image name.<br>
+**Example:** For an image named *my-id-flow*, the deployment and pod will be named *scr-my-id-flow*.
+
 ---
 #### Restart pod
 ![](./images/restart-pod.jpg)
@@ -227,13 +267,15 @@ Run the step to receive a list of all pods running in the namespace linked to pu
 ### Options
 ![](./images/options.jpg)
 
-Set the url for the pull-scr service. The default address is ```pull-scr.default.svc.cluster.local```. By default *pull-scr* is loaded into namespace ```default```. If you have loaded it into a different namespace you can set the url here.<br> 
-The step is using the internal DNS by default. If you are not using the default namespace you can set a different url using this format:<br>
-```<pod-name>.<namespace>.svc.cluster.local```<br>
-<br>
-You can also set a different url by setting macro ```PULL_SCR_URL```. This could be done in *SAS Studio Autoexec file*, so it is automatically set every time you start *SAS Studio*. E.g.:
+Configure the URL for the *pull-scr* service. The default is:
+```
+pull-scr.default.svc.cluster.local
+```
+If *pull-scr* is not deployed namespace ```scr```, update the URL using the format:
+```
+<pod-name>.<namespace>.svc.cluster.local
+```
+Alternatively, you can set a different URL by setting macro ```PULL_SCR_URL```. This could be done in *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
 ```
 %let pull_scr_url= %nrquote(pull-scr.mynamespace.svc.cluster.local);
 ```
-
-
