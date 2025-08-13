@@ -172,25 +172,23 @@ If the SCR image accesses a database, you must create a database secret. You can
 #### 3. Deploy pull-scr to Kubernetes
 1. Copy the following files to ```~/pull-scr```:
     * [pull-scr.yaml](./data/yaml/pull-scr.yaml)
-    * [ns-role.yaml](./data/yaml/ns-role.yaml)
+    * [ns-role.yaml](./data/yaml/ns-role.yaml)<br><br>
 
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *ns-role.yaml* to the correct namespace.
 
-    >❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *pull-scr.yaml* and *ns-role.yaml* to the correct namespace:
+    >❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *pull-scr.yaml* and *ns-role.yaml* to the correct namespace.
 
 2. Apply the deployment:
-    >❗**Note:** The yaml file will load *pull-scr* into namespace *default*. If you load *pull-scr* into a different namespace you need to **adjust pull-scr.yaml** accordingly.
     ```
     cd ~/pull-scr
     kubectl apply -f pull-scr.yaml
+    kubectl apply -f ns-role.yaml 
     ```
-3. Set namespace permissions:
-    >❗**Note:** *ns-role.yaml* sets user rights for *pull-scr* to access the scr namespace.<br>
-    >* If using a different namespace, update ```namespace: default```
-    >* If SCR containers are loaded into a different namespace than *scr*, update ```namespace: scr``` accordingly
-
-4. Verify Deployment<br>
+3. Verify Deployment<br>
     After applying both files, verify that the *pull-scr* service is running in Kubernetes.
+    ```
+    kubectl get pods --namespace default | grep pull-scr
+    ```
 
 ---
 ## ID - Deploy SCR
