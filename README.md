@@ -37,33 +37,37 @@ cd ~
 mkdir pull-scr
 cd pull-scr
 ```
-Copy the following files into the ```~/pull-scr``` directory:
-* [pull-scr.config](./data/config/pull-scr.config)
-* [scr-template.yaml](./data/config/scr-template.yaml)
 
 ---
 #### 2. Configure pull-scr
-Edit the *pull-scr.config* file to set the required parameters for your pull-scr instance.
+Copy the following file into the ```~/pull-scr``` directory:
+* [pull-scr.config](./data/config/pull-scr.config)
+
+Edit file *pull-scr.config* to set the required parameters for your *pull-scr* instance.
 | *Name* | *Comment* |
 | ---    | ---       |
-| BASE_URL | Base endpoint of the pull-scr container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /pull-scr |
+| BASE_URL | Base endpoint of the *pull-scr* container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /pull-scr |
 | PORT | Target port for the *pull-scr* container. |
-| HOST | External host address (typically the hostname) where pull-scr is accessible. |
-| NAMESPACE | Kubernetes namespace dedicated to *pull-scr* (e.g., scr). |
+| HOST | External host address (typically the hostname) where *pull-scr* is accessible. |
+| NAMESPACE | Kubernetes namespace dedicated to *pull-scr*<br>**Default:** scr |
 | LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** False |
-| PULL_SCR | Enables the /pull-scr endpoint to pull and load images from the Docker registry.<br>***Default:*** False |
+| PULL_SCR | Enables the /pull-scr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** False |
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** False |
 | DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** False |
 
 #### 3. Review scr-template.yaml
-The scr-template.yaml file is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
+Copy the following file into the ```~/pull-scr``` directory:
+* [scr-template.yaml](./data/config/scr-template.yaml)
+
+The file *scr-template.yaml* is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
 
 #### 4. Create ConfigMaps
->❗**Note**: By default, *pull-scr* is deployed in the ```default``` namespace. If you use a different namespace, update the namespace in the commands below and also in the following files:
-
+Copy the following file into the ```~/pull-scr``` directory:
 * [pull-scr.yaml](./data/yaml/pull-scr.yaml)
 * [ns-role.yaml](./data/yaml/ns-role.yaml)
 
+>❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update the namespace in the *pull-scr.yaml* and *ns-role.yaml* and also commands below:
+ 
 Format to create a ConfigMap:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
 
