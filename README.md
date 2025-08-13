@@ -154,7 +154,7 @@ If the SCR image accesses a database, you must create a database secret. You can
         ```
         >💡**Tip:** After the key word *connectionstring=* you can use the same connection string you use with MAS.
 
-    * Base64 encode the connection string:
+    * **Base64 encode** the connection string:
         ```
         Y29ubmVjdGlvbnN0cmluZz1kcml2ZXI9c3FsO2Nvbm9wdHM9KChkcml2ZXI9cG9zdGdyZXM7Y2F0YWxvZz1wdWJsaWM7dWlkPXNhcztwd2Q9J2xueHNhcyc7c2VydmVyPSBwZy1hZ2VudGljLWFpLXBvc3RncmVzcWwuYWdlbnRpYy1haS5zdmMuY2x1c3Rlci5sb2NhbDtwb3J0PTU0MzE7REI9cG9zdGdyZXM7KSk=
         ```
@@ -173,6 +173,10 @@ If the SCR image accesses a database, you must create a database secret. You can
 1. Copy the following files to ```~/pull-scr```:
     * [pull-scr.yaml](./data/yaml/pull-scr.yaml)
     * [ns-role.yaml](./data/yaml/ns-role.yaml)
+
+    >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *ns-role.yaml* to the correct namespace.
+
+    >❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *pull-scr.yaml* and *ns-role.yaml* to the correct namespace:
 
 2. Apply the deployment:
     >❗**Note:** The yaml file will load *pull-scr* into namespace *default*. If you load *pull-scr* into a different namespace you need to **adjust pull-scr.yaml** accordingly.
