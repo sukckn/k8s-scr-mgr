@@ -40,7 +40,7 @@ cd pull-scr
 
 ---
 #### 2. Configure pull-scr
-Copy the following file into the directory ```~/pull-scr```:
+Copy the following file into directory ```~/pull-scr```:
 * [pull-scr.config](./data/config/pull-scr.config)
 
 Edit file *pull-scr.config* to set the required parameters for your *pull-scr* instance.
@@ -56,18 +56,12 @@ Edit file *pull-scr.config* to set the required parameters for your *pull-scr* i
 | DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** False |
 
 #### 3. Review scr-template.yaml
-Copy the following file into the directory ```~/pull-scr```:
+Copy the following file into directory ```~/pull-scr```:
 * [scr-template.yaml](./data/config/scr-template.yaml)
 
 The file *scr-template.yaml* is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
 
 #### 4. Create ConfigMaps
-Copy the following files into the directory ```~/pull-scr```:
-* [pull-scr.yaml](./data/yaml/pull-scr.yaml)
-* [ns-role.yaml](./data/yaml/ns-role.yaml)
->❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *ns-role.yaml* to the correct namespace.
-
->❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *pull-scr.yaml* and *ns-role.yaml* and also in the commands below:
 
 Format to create a ConfigMap:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
