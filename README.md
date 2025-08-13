@@ -215,7 +215,7 @@ Use this section to choose the operation you want to perform:
 * **Get list of pods in namespace**<br>
     Retrieve a list of pods in the *scr-pull* namespace, including status and age information.
 
-    ![](./images/pull-image.jpg)
+![](./images/pull-image.jpg)
 
 #### Pull image
 * **Container Image Name**<br>
