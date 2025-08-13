@@ -94,7 +94,7 @@ kubectl create configmap kubectl-config \
 To load *pull-scr* into Kubernetes, you must first create a Kubernetes secret to pull the SCR image from your Docker registry.
 
 1. Copy the file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to the server directory ```~/pull-scr```.
-    >❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *scr-secret-docker.yaml*.
+    >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-docker.yaml* to the correct namespace.
 
 2. Open the file in an editor and replace the placeholder &lt;DOCKER-PULL-SECRET&gt; with your Docker registry credentials.
 
@@ -143,7 +143,7 @@ To load *pull-scr* into Kubernetes, you must first create a Kubernetes secret to
 #### 2. Create Database Secret
 If the SCR image accesses a database, you must create a database secret. You can skip this step if you are not accessing a database.
 1. Copy the file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml) to ```~/pull-scr```
-    >❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *scr-secret-db.yaml*.
+    >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-db.yaml* to the correct namespace.
 
 2. Open the file and replace &lt;DB-SECRET&gt; with your database connection string.
 
