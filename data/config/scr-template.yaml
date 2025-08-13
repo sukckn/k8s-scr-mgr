@@ -44,11 +44,11 @@ spec:
       restartPolicy: Always
       securityContext: {}
       imagePullSecrets:
-      - name: scr-agent-registry-pull-secret
+      - name: scr-docker-pull-secret
       volumes:
       - name: scr-db-secrets
         secret:
-          secretName: scr-agent-db.secrets
+          secretName: scr-db-secrets
           items:
           - key: db.secrets
             path: db.secrets
