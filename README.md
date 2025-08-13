@@ -6,10 +6,10 @@
 ## Features
 Once deployed, the `pull-scr` container provides a service accessible via custom step *ID - Deploy SCR* in SAS Studio to:
 
-- **Load** SCR images into Kubernetes
-- **Restart** launched SCR containers
-- **Delete** SCR container deployments
-- **List** all pods running in a dedicated Kubernetes namespace
+🔷 **Load** SCR images into Kubernetes<br>
+🔷 **Restart** launched SCR containers<br>
+🔷 **Delete** SCR container deployments<br>
+🔷 **List** all pods running in a dedicated Kubernetes namespace<br>
 
 > ⚠️ For security reasons, all SCR containers are loaded into a **single dedicated namespace**.
 ---
@@ -185,6 +185,7 @@ If the SCR image accesses a database, you must create a database secret. You can
 4. Verify Deployment<br>
     After applying both files, verify that the *pull-scr* service is running in Kubernetes.
 
+---
 ## ID - Deploy SCR
 The **ID - Deploy SCR** custom step allows you to interact with the pull-scr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
 
