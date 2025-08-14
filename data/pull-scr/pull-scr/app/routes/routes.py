@@ -48,6 +48,11 @@ def create_blueprint(base_url):
             status= 400
             return jsonify({'error': 'Error: Parameter >image_pull_policy< is required'}), status
 
+        SET_DB_SECRET= int(inputData.get('db_secret'))
+        if SET_DB_SECRET == None:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >db_secret< is required'}), status
+
         # get parameters from config or use default
         namespace= current_app.config.get('NAMESPACE', 'default')
         host= current_app.config.get('HOST', '127.0.0.1')
@@ -62,6 +67,12 @@ def create_blueprint(base_url):
                 val= v[list(v.keys())[0]]
                 env+= f'        - name: "{na}"\n          value: "{val}"\n'
 
+        db_secret_mount= ''
+        db_secret_volume= ''
+        if SET_DB_SECRET:
+            db_secret_mount= '        - name: scr-db-secrets\n          mountPath: /opt/scr/secrets/db'
+            db_secret_volume= '      - name: scr-db-secrets\n        secret:\n          secretName: scr-db-secrets\n          items:\n          - key: db.secrets\n            path: db.secrets'
+
         # Open yaml template and replace placeholders
         with open('./template/scr-template.yaml', 'r') as file:
             yaml_template= file.read()
@@ -74,6 +85,8 @@ def create_blueprint(base_url):
         yaml_content= yaml_content.replace('<HOST>', host)
         yaml_content= yaml_content.replace('<PORT>', port)
         yaml_content= yaml_content.replace('<ENV-VARS>', env)
+        yaml_content= yaml_content.replace('<DB-SECRET-MOUNT>', db_secret_mount)
+        yaml_content= yaml_content.replace('<DB-SECRET-VOLUME>', db_secret_volume)
 
         # Write the modified content to a new yaml file
         yaml_file= f'./yaml/scr-{SCR_NAME}.yaml'
@@ -208,8 +221,9 @@ def create_blueprint(base_url):
         # Return the list as JSON
         return jsonify({
             'list':list,
-            'ns': namespace,
+            'ns': namespace
             }), 200
+
 ##########################################################################################
     @bp.route('/delete-scr', methods=['POST'])
     def delete_scr():
@@ -287,8 +301,114 @@ def create_blueprint(base_url):
 
         # Return a response
         return jsonify({
-            'message': f'Deployment {DEPLOYMENT_NAME} and associated resources deleted successfully.',
-            'url': f'https://{host}:{port}/{DEPLOYMENT_NAME}'
+            'message': f'Deployment {DEPLOYMENT_NAME} and associated resources deleted successfully.'
                     }), 200
+
+##########################################################################################
+    @bp.route('/getlog-scr', methods=['POST'])
+    def getlog_scr():
+        endpoint_available= current_app.config.get('GETLOG_SCR', False)
+        if not endpoint_available:
+            return jsonify({'error': 'Endpoint "/getlog-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+
+        # Get JSON data from the request
+        inputData= request.get_json()
+
+        # set http status code
+        status= 200
+
+        # get input parameters
+        POD_NAME= inputData.get('pod_name')
+        if not POD_NAME:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >pod_name< is required'}), status
+        SHOW_ROWS= inputData.get('show_rows')
+        if not POD_NAME:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >show_rows< is required'}), status
+        if SHOW_ROWS not in ['ALL', 'TOP', 'BOTTOM']:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >show_rows< must be either >ALL< or >TOP< or >BOTTOM<'}), status
+        NUM_ROWS= int(inputData.get('num_rows'))
+        if not POD_NAME:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >num_rows< is required'}), status
+        if NUM_ROWS < 0:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >num_rows< must be greater than or equal to 0'}), status
+        
+        # get parameters from config or use default
+        namespace= current_app.config.get('NAMESPACE', 'default')
+
+        # Define the command to get pod name
+        command= f"kubectl get pods --namespace {namespace} | grep {POD_NAME}"
+
+        # get pod name
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)            
+            podname= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response        
+            msg= f'Error: {e.stderr.strip()}'
+            return jsonify({"error": msg}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response  
+            return jsonify({'error': f'{e}'}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error: {result.stderr}'
+            return jsonify({'error': f'{msg}'}), status
+        if result.stdout[0:5] == 'Error':
+            status= 400 # Failed Dependency
+            msg= f'Error: {result.stdout}'
+            return jsonify({'error': f'{msg}'}), status
+
+        podname= podname[0:podname.find(' ')]  # Extract the pod name from the output
+
+        # Define the command to get log
+        command= f"kubectl logs --namespace {namespace} {podname}"
+
+        log= []
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)
+
+            # get log line by line
+            for line in result.stdout.splitlines():
+                log.append(line.strip())
+        
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response        
+            msg= f'Error: {e.stderr.strip()}'
+            return jsonify({"error": msg}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response  
+            return jsonify({'error': f'{e}'}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error: {result.stderr}'
+            return jsonify({'error': f'{msg}'}), status
+        if result.stdout[0:5] == 'Error':
+            status= 400 # Failed Dependency
+            msg= f'Error: {result.stdout}'
+            return jsonify({'error': f'{msg}'}), status
+
+        if SHOW_ROWS == 'TOP':
+            log= log[:NUM_ROWS] # Limit the number of log lines to top NUM_ROWS
+        elif SHOW_ROWS == 'BOTTOM':
+            log= log[len(log)-NUM_ROWS:] # Limit the number of log lines to bottom NUM_ROWS
+
+        log.insert(0, 'Log')  # Add a header to the log list
+        # Return the list as JSON
+        return jsonify({
+            'log':log,
+            'ns': namespace,    
+            'pod_name': podname
+            }), 200
 
     return bp
