@@ -195,10 +195,11 @@ If the SCR image accesses a database, you must create a database secret. You can
 ## ID - Deploy SCR
 The **ID - Deploy SCR** custom step allows you to interact with the pull-scr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
 
-🔷 pulling container images, <br>
-🔷 restarting pods, <br>
-🔷 deleting deployments, <br>
-🔷 listing pods in the dedicated Kubernetes namespace.<br>
+🔷 **Load** SCR images into Kubernetes<br>
+🔷 **Restart** launched SCR containers<br>
+🔷 **Delete** SCR container deployments<br>
+🔷 **List** all pods running in the dedicated Kubernetes namespace<br>
+🔷 **Show** log for SCR container<br>
 
 ---
 ### Importing the Custom Step
@@ -220,6 +221,8 @@ Use this section to choose the operation you want to perform:
     Remove an SCR deployment from Kubernetes.
 * **Get list of pods in namespace**<br>
     Retrieve a list of pods in the *scr-pull* namespace, including status and age information.
+* **Get log**<br>
+    Retrive the log for a container in the dedicated namespace.
 
 ![](./images/pull-image.jpg)
 
@@ -239,6 +242,8 @@ Options:
     The Kubelet will only pull the image if it is not already present on the node. If a local copy exists, it will be used without checking the registry for updates
     * Never<br>
     It will only use a locally available image. If the image is not found locally, the container launch will fail. This policy is typically used for development or air-gapped environments where images are pre-loaded onto nodes
+* **SCR is using database**
+    * Tick this box if the SCR image is accessing a database. If this box is ticked a database secret needs to be set. [See Create Database Secret](#2-create-database-secret).    
 * **Environment Variables**<br>
 Set the number of environment variables you want to set for the scr container
 * **Environment Variable**<br>
@@ -270,6 +275,23 @@ Set the name of the scr deployment you want to delete.
 
 Run the step to receive a list of all pods running in the namespace linked to pull-scr.
 
+---
+#### Get log
+![](./images/get-log.jpg)
+
+* **Pod name**<br>
+The name of the pod for wich you want the log information.<br>
+You don't need to type in the complete pod name, partions of it will work. E.g.: if the pod name is 'scr-mypod-7b7c55d84b-2fm87' you can just tyep 'mypod'.
+
+* **Show rows in log**
+This indecates how many rows on the log will be shows.
+    * All rows<br>
+    Shows the complete log
+    * Top rows<br>
+    Show the top number of rows as set in field **Number of rows**
+    * Bottom rows<br>
+    Show last number of rows as set in field **Number of rows**
+<br><br>
 ---
 ### Options
 ![](./images/options.jpg)
