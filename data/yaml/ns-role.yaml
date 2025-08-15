@@ -18,11 +18,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: pull-scr-manager-binding
-  namespace: # namespace to load the scr containers
+  namespace: scr # namespace to load the scr containers
 subjects:
 - kind: ServiceAccount
   name: default
-  namespace: # namespace to load the scr containers
+  namespace: default # namespace pull-scr is running
 roleRef:
   kind: Role
   name: pull-scr-manager
