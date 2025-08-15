@@ -27,8 +27,7 @@ spec:
           containerPort: 8080
           protocol: TCP
         volumeMounts:
-        - name: scr-db-secrets
-          mountPath: /opt/scr/secrets/db
+<DB-SECRET-MOUNT>
         env:
         - name: "Dummy-Env"
           value: "Info"
@@ -46,12 +45,7 @@ spec:
       imagePullSecrets:
       - name: scr-docker-pull-secret
       volumes:
-      - name: scr-db-secrets
-        secret:
-          secretName: scr-db-secrets
-          items:
-          - key: db.secrets
-            path: db.secrets
+<DB-SECRET-VOLUME>
 ---
 apiVersion: v1
 kind: Service
