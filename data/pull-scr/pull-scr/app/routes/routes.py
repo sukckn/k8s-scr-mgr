@@ -365,6 +365,12 @@ def create_blueprint(base_url):
             status= 400 # Failed Dependency
             msg= f'Error: {result.stdout}'
             return jsonify({'error': f'{msg}'}), status
+        if not result.stdout:
+            status= 404 # Not Found
+            return jsonify({'error': f'Pod with name "{POD_NAME}" not found in namespace "{namespace}".'}), status
+        if len(result.stdout.splitlines()) > 1:
+            status= 400 # Bad Request
+            return jsonify({'error': f'Multiple pods found with name "{POD_NAME}" in namespace "{namespace}". Please specify a more specific pod name.'}), status
 
         podname= podname[0:podname.find(' ')]  # Extract the pod name from the output
 
