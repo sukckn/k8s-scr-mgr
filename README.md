@@ -62,7 +62,10 @@ Copy the following file into directory ```~/pull-scr```:
 
 The file *scr-template.yaml* is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
 
-#### 4. Create ConfigMaps
+#### 4. Kubernetes config file
+We use the Kubernetes config information from your home directory, assuming the Kubernetes config in is ```$HOME/.kube/config```. If the Kubernetes config file is in a different location you need to change the appropriate command below accordingly.
+
+#### 5. Create ConfigMaps
 
 Format to create a ConfigMap:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
