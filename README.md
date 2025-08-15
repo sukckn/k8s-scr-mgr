@@ -9,7 +9,8 @@ Once deployed, the `pull-scr` container provides a service accessible via custom
 🔷 **Load** SCR images into Kubernetes<br>
 🔷 **Restart** launched SCR containers<br>
 🔷 **Delete** SCR container deployments<br>
-🔷 **List** all pods running in a dedicated Kubernetes namespace<br>
+🔷 **List** all pods running in the dedicated Kubernetes namespace<br>
+🔷 **Show** log for SCR container<br>
 
 > ⚠️ For security reasons, all SCR containers are loaded into a **single dedicated namespace**.
 ---
