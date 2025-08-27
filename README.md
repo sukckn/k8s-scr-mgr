@@ -1,4 +1,4 @@
-![pull-scr logo](./images/pull-scr%20logo.png)
+![pull-scr logo](./images/k8s-scr-adm_icon.png)
 
 # `pull-scr`: Service Container for SAS Viya SCR Images
 `pull-scr` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry but developers may not have direct access to the Kubernetes cluster.
