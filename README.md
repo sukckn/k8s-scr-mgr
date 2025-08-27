@@ -295,14 +295,30 @@ The name of the pod for wich you want the log information.<br>
 You don't need to type in the complete pod name, partions of it will work. E.g.: if the pod name is 'scr-mypod-7b7c55d84b-2fm87' you can just tyep 'mypod'.
 
 * **Show rows in log**
-This indecates how many rows on the log will be shows.
+This indecates how many rows from the log will be shown.
     * All rows<br>
     Shows the complete log
     * Top rows<br>
     Show the top number of rows as set in field **Number of rows**
     * Bottom rows<br>
     Show last number of rows as set in field **Number of rows**
-<br><br>
+
+#### Get MAS log
+![](./images/get-MAS-log.jpg)
+
+* **Show rows in log**
+This indecates how many rows from the log will be shown.
+    * All rows<br>
+    Shows the complete log
+    * Top rows<br>
+    Show the top number of rows as set in field **Number of rows**
+    * Bottom rows<br>
+    Show last number of rows as set in field **Number of rows**
+
+    > By default it will show the last 30 rows in the log.
+
+<br>
+
 ---
 ### Options
 ![](./images/options.jpg)
