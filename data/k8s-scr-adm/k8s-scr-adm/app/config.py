@@ -1,5 +1,13 @@
 class Config:
-    BASE_URL= '/pull-scr'
-    NAMESPACE= 'scr'
+    BASE_URL= '/k8s-scr-adm'
     PORT= '8080'
     HOST= 'my-server.sas.com'
+    NAMESPACE= 'scr'
+    VIYA_NAMESPACE= 'viya4'
+    MAS_POD= 'sas-microanalytic-score'
+    LIST_SCR= True
+    PULL_SCR= True
+    RESTART_SCR= True
+    DELETE_SCR= True
+    GETLOG_SCR= True
+    GETLOG_MAS= True

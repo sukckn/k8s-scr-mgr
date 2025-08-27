@@ -1,12 +1,11 @@
-
 from flask import request, jsonify, Blueprint, current_app
 import json
 from datetime import datetime, timezone
 import subprocess
 
 def create_blueprint(base_url):
-    # Create a Blueprint for the pull-scr routes
-    bp= Blueprint('pull-scr', __name__, url_prefix=base_url)
+    # Create a Blueprint for the k8s-scr-adm routes
+    bp= Blueprint('k8s-scr-adm', __name__, url_prefix=base_url)
 
 ##########################################################################################
     @bp.route('/', methods=['GET'])
@@ -19,7 +18,7 @@ def create_blueprint(base_url):
     def pull_scr():
         endpoint_available= current_app.config.get('PULL_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/pull-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/pull-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -120,7 +119,7 @@ def create_blueprint(base_url):
     def restart_scr():
         endpoint_available= current_app.config.get('RESTART_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/restart-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/restart-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -165,7 +164,7 @@ def create_blueprint(base_url):
     def list_scr():
         endpoint_available= current_app.config.get('LIST_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/list-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/list-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
 
         namespace= current_app.config.get('NAMESPACE', 'default')
 
@@ -229,7 +228,7 @@ def create_blueprint(base_url):
     def delete_scr():
         endpoint_available= current_app.config.get('DELETE_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/delete-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/delete-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -309,7 +308,7 @@ def create_blueprint(base_url):
     def getlog_scr():
         endpoint_available= current_app.config.get('GETLOG_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/getlog-scr" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/getlog-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -367,10 +366,10 @@ def create_blueprint(base_url):
             return jsonify({'error': f'{msg}', 'ns': namespace, 'pod_name': POD_NAME}), status
         if not result.stdout:
             status= 404 # Not Found
-            return jsonify({'error': f'Pod with name "{POD_NAME}" not found in namespace "{namespace}".'}), status
+            return jsonify({'error': f'Pod with name >{POD_NAME}< not found in namespace >{namespace}<.'}), status
         if len(result.stdout.splitlines()) > 1:
             status= 400 # Bad Request
-            return jsonify({'error': f'Multiple pods found with name "{POD_NAME}" in namespace "{namespace}". Please specify a more specific pod name.'}), status
+            return jsonify({'error': f'Multiple pods found with name >{POD_NAME}< in namespace >{namespace}<. Please specify a more specific pod name.'}), status
 
         podname= podname[0:podname.find(' ')]  # Extract the pod name from the output
 
@@ -422,7 +421,7 @@ def create_blueprint(base_url):
     def getlog_mas():
         endpoint_available= current_app.config.get('GETLOG_MAS', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/getlog-mas" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/getlog-mas" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -446,43 +445,11 @@ def create_blueprint(base_url):
             status= 400
             return jsonify({'error': 'Error: Parameter >num_rows< must be greater than or equal to 0'}), status
 
-        prefix_pod_name= 'sas-microanalytic-score'
-        # Define the command to get MAS pod namespace
-        command= f"kubectl get pods --all-namespaces --no-headers | grep '{prefix_pod_name}' " +"| awk '{print $1}'"
+        prefix_pod_name= current_app.config.get('MAS_POD', 'sas-microanalytic-score')
+        # get parameters from config
+        namespace= current_app.config.get('VIYA_NAMESPACE', 'default')
 
-        # get name space
-        try:
-            # Run the command
-            result= subprocess.run(command, shell=True, capture_output=True, text=True)            
-            namespace= result.stdout.strip().split('\n')
-        except subprocess.CalledProcessError as e:
-            status= 424 # Failed Dependency
-            # Return an error response        
-            msg= f'Error get namespace: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
-        except Exception as e:
-            status= 424 # Failed Dependency
-            # Return an error response  
-            return jsonify({'error': f'Error get namespace: {e}'}), status
-        if len(result.stderr) > 0:
-            status= 400 # Failed Dependency
-            msg= f'Error get namespace: {result.stderr}'
-            return jsonify({'error': f'{msg}'}), status
-        if result.stdout[0:5] == 'Error':
-            status= 400 # Failed Dependency
-            msg= f'Error get namespace: {result.stdout}'
-            return jsonify({'error': f'{msg}'}), status
-        if not result.stdout:
-            status= 404 # Not Found
-            return jsonify({'error': f'Namespace not found for MAS pod.'}), status
-        if len(result.stdout.splitlines()) > 1:
-            status= 400 # Bad Request
-            return jsonify({'error': f'Multiple pods found with name "{prefix_pod_name}" in namespace "{namespace}". Please specify a more specific pod name.'}), status
-
-        # Define the command to get pod name
-        #command= f"kubectl get pods --namespace {namespace} | grep {prefix_pod_name}"
-        #command= ["kubectl", "get", "pods", "--namespace", namespace, "|", "grep", prefix_pod_name]
-        command= ["kubectl", "get", "pods", "-n", "viya4"]
+        command= ["kubectl", "get", "pods", "-n", namespace]
 
         # get podname
         try:
@@ -512,16 +479,10 @@ def create_blueprint(base_url):
             return jsonify({'error': f'{msg}'}), status
         if not result.stdout:
             status= 404 # Not Found
-            return jsonify({'error': f'Pod with name "{prefix_pod_name}" not found in namespace "{namespace}".'}), status
-#        if len(result.stdout.splitlines()) > 1:
-#            status= 400 # Bad Request
-#            return jsonify({'error': f'Multiple pods found with name "{prefix_pod_name}" in namespace "{namespace}". Please specify a more specific pod name.'}), status
-
-        #podname= podname[0:podname.find(' ')]  # Extract the pod name from the output
+            return jsonify({'error': f'Pod with name >{prefix_pod_name}< not found in namespace >{namespace}<.'}), status
 
         # Define the command to get log
-        namespace= 'viya4'
-        command= ["kubectl", "logs", "--namespace", namespace, "sas-microanalytic-score-865c65779b-5k7t6", "-c", "sas-microanalytic-score"]
+        command= ["kubectl", "logs", "--namespace", namespace, podname, "-c", "sas-microanalytic-score"]
 
         log= []
         try:

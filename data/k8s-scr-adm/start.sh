@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /pull-scr
-exec gunicorn -b :5000 --access-logfile - --error-logfile - pull-scr:app
+cd /k8s-scr-adm
+exec gunicorn -b :5000 --access-logfile - --error-logfile - k8s-scr-adm:app
 
