@@ -1,10 +1,10 @@
-![pull-scr logo](./images/k8s-scr-adm_rm.png)
+![k8s-scr-adm logo](./images/k8s-scr-adm_rm.png)
 
-# `pull-scr`: Service Container for SAS Viya SCR Images
-`pull-scr` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry but developers may not have direct access to the Kubernetes cluster.
+# `k8s-scr-adm`: Service Container for SAS Viya SCR Images
+`k8s-scr-adm` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry but developers may not have direct access to the Kubernetes cluster.
 
 ## Features
-Once deployed, the `pull-scr` container provides a service accessible via custom step *ID - Deploy SCR* in SAS Studio to:
+Once deployed, the `k8s-scr-adm` container provides a service accessible via custom step *ID - Deploy SCR* in SAS Studio to:
 
 🔷 **Load** SCR images into Kubernetes<br>
 🔷 **Restart** launched SCR containers<br>
@@ -16,10 +16,10 @@ Once deployed, the `pull-scr` container provides a service accessible via custom
 ---
 
 ## Installation Guide
-> ❗**Note**: By default *pull-scr* will be installed into namespace ```default```. The default namespace to load the scr containers is ```scr```. Both namespaces can be changed if necessary.
+> ❗**Note**: By default *k8s-scr-adm* will be installed into namespace ```default```. The default namespace to load the scr containers is ```scr```. Both namespaces can be changed if necessary.
 
 ### Create a Dedicated Namespace
-`pull-scr` operates within a single Kubernetes namespace per instance. If you require multiple namespaces, you must deploy separate instances of `pull-scr`.
+`k8s-scr-adm` operates within a single Kubernetes namespace per instance. If you require multiple namespaces, you must deploy separate instances of `k8s-scr-adm`.
 
 If you don't have a dedicated namespace yet, you need to create one. The default namespace to load the scr images is ```scr```. To create a namespace `scr`, run:
 
@@ -27,37 +27,37 @@ If you don't have a dedicated namespace yet, you need to create one. The default
 kubectl create namespace scr
 ```
 
-### Creating ConfigMaps for pull-scr
-To configure the pull-scr container, you need to create three ConfigMaps. Follow the steps below to prepare your environment and apply the necessary configurations.
+### Creating ConfigMaps for k8s-scr-adm
+To configure the k8s-scr-adm container, you need to create three ConfigMaps. Follow the steps below to prepare your environment and apply the necessary configurations.
 
 ---
 #### 1. Prepare the Working Directory
 On the server where you access Kubernetes (e.g., via MobaXterm), open a terminal and create a working directory:
 ```
 cd ~
-mkdir pull-scr
-cd pull-scr
+mkdir k8s-scr-adm
+cd k8s-scr-adm
 ```
 
 ---
-#### 2. Configure pull-scr
-Copy the following file into directory ```~/pull-scr```:
-* [pull-scr.config](./data/config/pull-scr.config)
+#### 2. Configure k8s-scr-adm
+Copy the following file into directory ```~/k8s-scr-adm```:
+* [k8s-scr-adm.config](./data/config/k8s-scr-adm.config)
 
-Edit file *pull-scr.config* to set the required parameters for your *pull-scr* instance.
+Edit file *k8s-scr-adm.config* to set the required parameters for your *k8s-scr-adm* instance.
 | *Name* | *Comment* |
 | ---    | ---       |
-| BASE_URL | Base endpoint of the *pull-scr* container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /pull-scr |
-| PORT | Target port for the *pull-scr* container. |
-| HOST | External host address (typically the hostname) where *pull-scr* is accessible. |
-| NAMESPACE | Kubernetes namespace dedicated to *pull-scr*<br>**Default:** scr |
+| BASE_URL | Base endpoint of the *k8s-scr-adm* container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /k8s-scr-adm |
+| PORT | Target port for the *k8s-scr-adm* container. |
+| HOST | External host address (typically the hostname) where *k8s-scr-adm* is accessible. |
+| NAMESPACE | Kubernetes namespace dedicated to *k8s-scr-adm*<br>**Default:** scr |
 | LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** False |
-| PULL_SCR | Enables the /pull-scr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** False |
+| PULL_SCR | Enables the /k8s-scr-adm endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** False |
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** False |
 | DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** False |
 
 #### 3. Review scr-template.yaml
-Copy the following file into directory ```~/pull-scr```:
+Copy the following file into directory ```~/k8s-scr-adm```:
 * [scr-template.yaml](./data/config/scr-template.yaml)
 
 The file *scr-template.yaml* is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
@@ -71,20 +71,20 @@ Format to create a ConfigMap:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
 
 Use the following commands to create the required ConfigMaps:
->❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, **update the export command** below:
+>❗**Note**: By default, *k8s-scr-adm* is deployed in namespace```default```. If you use a different namespace, **update the export command** below:
 
 ```
 # Set the namespace (!!change if needed!!)
 export PULL_SCR_NAMESPACE="default"
 
-# Create ConfigMap for pull-scr configuration
-kubectl create configmap pull-scr-config \
-  --from-file=config=$HOME/pull-scr/pull-scr.config \
+# Create ConfigMap for k8s-scr-adm configuration
+kubectl create configmap k8s-scr-adm-config \
+  --from-file=config=$HOME/k8s-scr-adm/k8s-scr-adm.config \
   --namespace=$PULL_SCR_NAMESPACE
 
 # Create ConfigMap for the SCR template
 kubectl create configmap scr-yaml-template \
-  --from-file=template=$HOME/pull-scr/scr-template.yaml \
+  --from-file=template=$HOME/k8s-scr-adm/scr-template.yaml \
   --namespace=$PULL_SCR_NAMESPACE
 
 # Create ConfigMap for kubectl configuration. 
@@ -95,9 +95,9 @@ kubectl create configmap kubectl-config \
 ```
 ### Load into Kubernetes
 #### 1. Create Image Pull Secret
-To load *pull-scr* into Kubernetes, you must first create a Kubernetes secret to pull the SCR image from your Docker registry.
+To load *k8s-scr-adm* into Kubernetes, you must first create a Kubernetes secret to pull the SCR image from your Docker registry.
 
-1. Copy the file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to the server directory ```~/pull-scr```.
+1. Copy the file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to the server directory ```~/k8s-scr-adm```.
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-docker.yaml* to the correct namespace.
 
 2. Open the file in an editor and replace the placeholder &lt;DOCKER-PULL-SECRET&gt; with your Docker registry credentials.
@@ -140,13 +140,13 @@ To load *pull-scr* into Kubernetes, you must first create a Kubernetes secret to
 
 3. Register secret in Kubernetes.
     ```
-    cd ~/pull-scr
+    cd ~/k8s-scr-adm
     kubectl apply -f scr-secret-docker.yaml
     ```
 ---
 #### 2. Create Database Secret
 If the SCR image accesses a database, you must create a database secret. You can skip this step if you are not accessing a database.
-1. Copy the file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml) to ```~/pull-scr```
+1. Copy the file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml) to ```~/k8s-scr-adm```
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-db.yaml* to the correct namespace.
 
 2. Open the file and replace &lt;DB-SECRET&gt; with your database connection string.
@@ -169,34 +169,34 @@ If the SCR image accesses a database, you must create a database secret. You can
 
 3. Register secret in Kubernetes.
     ```
-    cd ~/pull-scr
+    cd ~/k8s-scr-adm
     kubectl apply -f scr-secret-db.yaml
     ```
 ---
-#### 3. Deploy pull-scr to Kubernetes
-1. Copy the following files to ```~/pull-scr```:
-    * [pull-scr.yaml](./data/yaml/pull-scr.yaml)
+#### 3. Deploy k8s-scr-adm to Kubernetes
+1. Copy the following files to ```~/k8s-scr-adm```:
+    * [k8s-scr-adm.yaml](./data/yaml/k8s-scr-adm.yaml)
     * [ns-role.yaml](./data/yaml/ns-role.yaml)<br><br>
 
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *ns-role.yaml* to the correct namespace.
 
-    >❗**Note**: By default, *pull-scr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *pull-scr.yaml* and *ns-role.yaml* to the correct namespace.
+    >❗**Note**: By default, *k8s-scr-adm* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *k8s-scr-adm.yaml* and *ns-role.yaml* to the correct namespace.
 
 2. Apply the deployment:
     ```
-    cd ~/pull-scr
-    kubectl apply -f pull-scr.yaml
+    cd ~/k8s-scr-adm
+    kubectl apply -f k8s-scr-adm.yaml
     kubectl apply -f ns-role.yaml 
     ```
 3. Verify Deployment<br>
-    After applying both files, verify that the *pull-scr* service is running in Kubernetes.
+    After applying both files, verify that the *k8s-scr-adm* service is running in Kubernetes.
     ```
-    kubectl get pods --namespace default | grep pull-scr
+    kubectl get pods --namespace default | grep k8s-scr-adm
     ```
 
 ---
 ## ID - Deploy SCR
-The **ID - Deploy SCR** custom step allows you to interact with the pull-scr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
+The **ID - Deploy SCR** custom step allows you to interact with the k8s-scr-adm service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
 
 🔷 **Load** SCR images into Kubernetes<br>
 🔷 **Restart** launched SCR containers<br>
@@ -276,7 +276,7 @@ Set the name of the scr deployment you want to delete.
 #### Get list of pods in namespace
 ![](./images/list-pods.jpg)
 
-Run the step to receive a list of all pods running in the namespace linked to pull-scr.
+Run the step to receive a list of all pods running in the namespace linked to k8s-scr-adm.
 
 ---
 #### Get log
@@ -299,15 +299,15 @@ This indecates how many rows on the log will be shows.
 ### Options
 ![](./images/options.jpg)
 
-Configure the URL for the *pull-scr* service. The default is:
+Configure the URL for the *k8s-scr-adm* service. The default is:
 ```
-pull-scr.default.svc.cluster.local
+k8s-scr-adm.default.svc.cluster.local
 ```
-If *pull-scr* is not deployed namespace ```scr```, update the URL using the format:
+If *k8s-scr-adm* is not deployed namespace ```scr```, update the URL using the format:
 ```
 <pod-name>.<namespace>.svc.cluster.local
 ```
 Alternatively, you can set a different URL by setting macro ```PULL_SCR_URL```. This could be done in *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
 ```
-%let pull_scr_url= %nrquote(pull-scr.mynamespace.svc.cluster.local);
+%let pull_scr_url= %nrquote(k8s-scr-adm.mynamespace.svc.cluster.local);
 ```
