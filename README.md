@@ -56,6 +56,8 @@ Edit file *k8s-scr-adm.config* to set the required parameters for your *k8s-scr-
 | PULL_SCR | Enables the /k8s-scr-adm endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** False |
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** False |
 | DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** False |
+| GETLOG_SCR | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>***Default:*** False |
+| GETLOG_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** False |
 
 #### 3. Review scr-template.yaml
 Copy the following file into directory ```~/k8s-scr-adm```:
@@ -76,23 +78,23 @@ Use the following commands to create the required ConfigMaps:
 
 ```
 # Set the namespace (!!change if needed!!)
-export PULL_SCR_NAMESPACE="default"
+export K8S_SCR_ADM_NAMESPACE="default"
 
 # Create ConfigMap for k8s-scr-adm configuration
 kubectl create configmap k8s-scr-adm-config \
   --from-file=config=$HOME/k8s-scr-adm/k8s-scr-adm.config \
-  --namespace=$PULL_SCR_NAMESPACE
+  --namespace=$K8S_SCR_ADM_NAMESPACE
 
 # Create ConfigMap for the SCR template
 kubectl create configmap scr-yaml-template \
   --from-file=template=$HOME/k8s-scr-adm/scr-template.yaml \
-  --namespace=$PULL_SCR_NAMESPACE
+  --namespace=$K8S_SCR_ADM_NAMESPACE
 
 # Create ConfigMap for kubectl configuration. 
 # Assuming the kubectl config file is in default location in the home directory
 kubectl create configmap kubectl-config \
   --from-file=config=$HOME/.kube/config \
-  --namespace=$PULL_SCR_NAMESPACE
+  --namespace=$K8S_SCR_ADM_NAMESPACE
 ```
 ### Load into Kubernetes
 #### 1. Create Image Pull Secret
@@ -177,17 +179,21 @@ If the SCR image accesses a database, you must create a database secret. You can
 #### 3. Deploy k8s-scr-adm to Kubernetes
 1. Copy the following files to ```~/k8s-scr-adm```:
     * [k8s-scr-adm.yaml](./data/yaml/k8s-scr-adm.yaml)
-    * [k8s-scr-adm-role.yaml](./data/yaml/k8s-scr-adm-role.yaml)<br><br>
+    * [k8s-scr-adm-role.yaml](./data/yaml/k8s-scr-adm-role.yaml)
+    * [mas-log-reader.yaml](./data/yaml/mas-log-reader.yaml)<br><br>
 
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *k8s-scr-adm-role.yaml* to the correct namespace.
 
     >❗**Note**: By default, *k8s-scr-adm* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *k8s-scr-adm.yaml* and *k8s-scr-adm-role.yaml* to the correct namespace.
+
+    >❗**Note**: In file mas-log-reader.yaml verify that the namespace for Viya is correct. By default it is pointing at *namespace: viya4*.
 
 2. Apply the deployment:
     ```
     cd ~/k8s-scr-adm
     kubectl apply -f k8s-scr-adm.yaml
     kubectl apply -f k8s-scr-adm-role.yaml 
+    kubectl apply -f mas-log-reader.yaml 
     ```
 3. Verify Deployment<br>
     After applying both files, verify that the *k8s-scr-adm* service is running in Kubernetes.
@@ -204,13 +210,14 @@ The **ID - K8S SCR Admin** custom step allows you to interact with the k8s-scr-a
 🔷 **Delete** SCR container deployments<br>
 🔷 **List** all pods running in the dedicated Kubernetes namespace<br>
 🔷 **Show** log for SCR container<br>
+🔷 **Show MAS** log for information<br>
 
 ---
 ### Importing the Custom Step
 To import custom step *ID - K8S SCR Admin*:
 * Open SAS Studio.
 * In your home folder (My Folder), create a sub-folder named ```custom steps```.
-* Upload file [ID - K8S SCR Admin.step](./data/custom_step/ID%20-%20Deploy%20SCR.step) into the *custom steps* folder.
+* Upload file [ID - K8S SCR Admin.step](./data/custom_step/ID%20-%20K8S%20SCR%20Admin.step) into the *custom steps* folder.
 
 ---
 ### User Interface
@@ -304,11 +311,11 @@ Configure the URL for the *k8s-scr-adm* service. The default is:
 ```
 k8s-scr-adm.default.svc.cluster.local
 ```
-If *k8s-scr-adm* is not deployed namespace ```scr```, update the URL using the format:
+If *k8s-scr-adm* is not deployed to namespace ```default```, update the URL using the format:
 ```
 <pod-name>.<namespace>.svc.cluster.local
 ```
-Alternatively, you can set a different URL by setting macro ```PULL_SCR_URL```. This could be done in *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
+Alternatively, you can set the Service URL by setting macro ```PULL_SCR_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
 ```
 %let pull_scr_url= %nrquote(k8s-scr-adm.mynamespace.svc.cluster.local);
 ```

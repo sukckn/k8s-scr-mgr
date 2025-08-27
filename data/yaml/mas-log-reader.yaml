@@ -3,7 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: mas-log-reader
-  namespace: viya4 # namespace where SAS Viya  is running
+  namespace: viya4 # namespace where SAS Viya is running
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -16,7 +16,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: mas-log-reader-binding
-  namespace: viya4 # namespace where SAS Viya  is running
+  namespace: viya4 # namespace where SAS Viya is running
 subjects:
 - kind: ServiceAccount
   name: default
