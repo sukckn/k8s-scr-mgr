@@ -315,7 +315,7 @@ If *k8s-scr-adm* is not deployed to namespace ```default```, update the URL usin
 ```
 <pod-name>.<namespace>.svc.cluster.local
 ```
-Alternatively, you can set the Service URL by setting macro ```PULL_SCR_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
+Alternatively, you can set the Service URL by setting macro ```K8S_SCR_ADM_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
 ```
-%let pull_scr_url= %nrquote(k8s-scr-adm.mynamespace.svc.cluster.local);
+%let k8s_scr_adm_url= %nrquote(k8s-scr-adm.mynamespace.svc.cluster.local);
 ```
