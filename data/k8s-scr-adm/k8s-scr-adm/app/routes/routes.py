@@ -521,7 +521,6 @@ def create_blueprint(base_url):
 
         # Define the command to get log
         namespace= 'viya4'
-#        command= f"kubectl logs --namespace {namespace} {podname}"
         command= ["kubectl", "logs", "--namespace", namespace, "sas-microanalytic-score-865c65779b-5k7t6", "-c", "sas-microanalytic-score"]
 
         log= []
