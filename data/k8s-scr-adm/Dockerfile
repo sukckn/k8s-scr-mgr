@@ -4,9 +4,9 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt 
 RUN pip install gunicorn
 
-COPY pull-scr pull-scr
-COPY start.sh pull-scr/
-RUN chmod a+x /pull-scr/start.sh
+COPY k8s-scr-adm k8s-scr-adm
+COPY start.sh k8s-scr-adm/
+RUN chmod a+x /k8s-scr-adm/start.sh
 
 RUN apt-get update -y && apt-get install -y curl
 
@@ -14,4 +14,5 @@ RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/s
 RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 EXPOSE 5000
-ENTRYPOINT ["/pull-scr/start.sh"]
+ENTRYPOINT ["/k8s-scr-adm/start.sh"]
+#ENTRYPOINT ["/bin/bash"]

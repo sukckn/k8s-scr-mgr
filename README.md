@@ -1,16 +1,17 @@
 ![k8s-scr-adm logo](./images/k8s-scr-adm_rm.png)
 
-# `k8s-scr-adm`: Service Container for SAS Viya SCR Images
+# `k8s-scr-adm`: Service Container for SAS Viya SCR
 `k8s-scr-adm` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry but developers may not have direct access to the Kubernetes cluster.
 
 ## Features
-Once deployed, the `k8s-scr-adm` container provides a service accessible via custom step *ID - Deploy SCR* in SAS Studio to:
+Once deployed, the `k8s-scr-adm` container provides a service accessible via custom step *ID - K8S SCR Admin* in SAS Studio to:
 
 🔷 **Load** SCR images into Kubernetes<br>
 🔷 **Restart** launched SCR containers<br>
 🔷 **Delete** SCR container deployments<br>
 🔷 **List** all pods running in the dedicated Kubernetes namespace<br>
 🔷 **Show** log for SCR container<br>
+🔷 **Show MAS** log for information<br>
 
 > ⚠️ For security reasons, all SCR containers are loaded into a **single dedicated namespace**.
 ---
@@ -176,17 +177,17 @@ If the SCR image accesses a database, you must create a database secret. You can
 #### 3. Deploy k8s-scr-adm to Kubernetes
 1. Copy the following files to ```~/k8s-scr-adm```:
     * [k8s-scr-adm.yaml](./data/yaml/k8s-scr-adm.yaml)
-    * [ns-role.yaml](./data/yaml/ns-role.yaml)<br><br>
+    * [k8s-scr-adm-role.yaml](./data/yaml/k8s-scr-adm-role.yaml)<br><br>
 
-    >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *ns-role.yaml* to the correct namespace.
+    >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *k8s-scr-adm-role.yaml* to the correct namespace.
 
-    >❗**Note**: By default, *k8s-scr-adm* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *k8s-scr-adm.yaml* and *ns-role.yaml* to the correct namespace.
+    >❗**Note**: By default, *k8s-scr-adm* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *k8s-scr-adm.yaml* and *k8s-scr-adm-role.yaml* to the correct namespace.
 
 2. Apply the deployment:
     ```
     cd ~/k8s-scr-adm
     kubectl apply -f k8s-scr-adm.yaml
-    kubectl apply -f ns-role.yaml 
+    kubectl apply -f k8s-scr-adm-role.yaml 
     ```
 3. Verify Deployment<br>
     After applying both files, verify that the *k8s-scr-adm* service is running in Kubernetes.
@@ -195,8 +196,8 @@ If the SCR image accesses a database, you must create a database secret. You can
     ```
 
 ---
-## ID - Deploy SCR
-The **ID - Deploy SCR** custom step allows you to interact with the k8s-scr-adm service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
+## ID - K8S SCR Admin
+The **ID - K8S SCR Admin** custom step allows you to interact with the k8s-scr-adm service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
 
 🔷 **Load** SCR images into Kubernetes<br>
 🔷 **Restart** launched SCR containers<br>
@@ -206,10 +207,10 @@ The **ID - Deploy SCR** custom step allows you to interact with the k8s-scr-adm 
 
 ---
 ### Importing the Custom Step
-To import custom step *ID - Deploy SCR*:
+To import custom step *ID - K8S SCR Admin*:
 * Open SAS Studio.
 * In your home folder (My Folder), create a sub-folder named ```custom steps```.
-* Upload file [ID - Deploy SCR.step](./data/custom_step/ID%20-%20Deploy%20SCR.step) into the *custom steps* folder.
+* Upload file [ID - K8S SCR Admin.step](./data/custom_step/ID%20-%20Deploy%20SCR.step) into the *custom steps* folder.
 
 ---
 ### User Interface

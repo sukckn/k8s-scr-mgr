@@ -1,0 +1,49 @@
+# mas-log-reader.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mas-log-reader
+  namespace: viya4 # namespace where SAS Viya  is running
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get","list","watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get","list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mas-log-reader-binding
+  namespace: viya4 # namespace where SAS Viya  is running
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default # namespace where k8s-scr-adm is running
+roleRef:
+  kind: Role
+  name: mas-log-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mas-log-reader-cluster
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mas-log-reader-cluster-binding
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: mas-log-reader-cluster
+  apiGroup: rbac.authorization.k8s.io

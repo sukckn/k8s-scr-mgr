@@ -1,35 +1,35 @@
 #############################################################################################################################################
-# This YAML loads container pull-scr into Kubernetes into namespace default
+# This YAML loads container k8s-scr-adm into Kubernetes
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 # - ensure setting for image is correct and pointing to the correct container image.
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# - run file on server where this yaml is stored: kubectl apply -f pull-scr.yaml
+# - run file on server where this yaml is stored: kubectl apply -f k8s-scr-adm.yaml
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# Call container: https://<Server>/pull-scr/<endpoint> 
+# Call container: https://<Server>/k8s-scr-adm/<endpoint> 
 #############################################################################################################################################
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pull-scr
+  name: k8s-scr-adm
   namespace: default
   labels:
     app-owner: viyademo01
-    app.kubernetes.io/name: pull-scr
+    app.kubernetes.io/name: k8s-scr-adm
 spec:
   replicas: 1
   selector:
     matchLabels:
       app-owner: viyademo01
-      app.kubernetes.io/name: pull-scr
+      app.kubernetes.io/name: k8s-scr-adm
   template:
     metadata:
       labels:
         app-owner: viyademo01
-        app.kubernetes.io/name: pull-scr
+        app.kubernetes.io/name: k8s-scr-adm
     spec:
       containers:
-      - name: pull-scr
-        image: ghcr.io/sukckn/pull-scr:latest
+      - name: k8s-scr-adm
+        image: ghcr.io/sukckn/k8s-scr-adm:latest
         imagePullPolicy: Always
         ports:
         - name: http
@@ -40,10 +40,10 @@ spec:
             mountPath: /tmp/config
             subPath: config
           - name: yaml-template
-            mountPath: /pull-scr/template/scr-template.yaml
+            mountPath: /k8s-scr-adm/template/scr-template.yaml
             subPath: template
-          - name: pull-scr-config
-            mountPath: /pull-scr/app/config.py
+          - name: k8s-scr-adm-config
+            mountPath: /k8s-scr-adm/app/config.py
             subPath: config
         securityContext:
           capabilities:
@@ -62,18 +62,18 @@ spec:
         - name: yaml-template
           configMap:
             name: scr-yaml-template
-        - name: pull-scr-config
+        - name: k8s-scr-adm-config
           configMap:
-            name: pull-scr-config
+            name: k8s-scr-adm-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: pull-scr
+  name: k8s-scr-adm
   namespace: default
   labels:
     app-owner: viyademo01
-    app.kubernetes.io/name: pull-scr
+    app.kubernetes.io/name: k8s-scr-adm
 spec:
   ports:
   - name: http
@@ -82,17 +82,17 @@ spec:
     targetPort: 5000
   selector:
     app-owner: viyademo01
-    app.kubernetes.io/name: pull-scr
+    app.kubernetes.io/name: k8s-scr-adm
   type: ClusterIP
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: pull-scr
+  name: k8s-scr-adm
   namespace: default
   labels:
     app-owner: viyademo01
-    app.kubernetes.io/name: pull-scr
+    app.kubernetes.io/name: k8s-scr-adm
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
@@ -105,10 +105,10 @@ spec:
   - host: ck05-sukckn.net.sas.com
     http:
       paths:
-      - path: /pull-scr
+      - path: /k8s-scr-adm
         pathType: Prefix
         backend:
           service:
-            name: pull-scr
+            name: k8s-scr-adm
             port:
               number: 80

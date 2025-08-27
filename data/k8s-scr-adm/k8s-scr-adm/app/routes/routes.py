@@ -12,7 +12,7 @@ def create_blueprint(base_url):
     @bp.route('/', methods=['GET'])
     @bp.route('/ping', methods=['GET'])
     def ping():
-        return jsonify({'message': 'Welcome to Pull SCR Service (Version 0.90)!'}), 200
+        return jsonify({'message': 'Welcome to Pull SCR Service (Version 0.18)!'}), 200
 
 ##########################################################################################
     @bp.route('/pull-scr', methods=['POST'])
@@ -145,11 +145,11 @@ def create_blueprint(base_url):
             status= 424 # Failed Dependency
             # Return an error response        
             msg= f'Error: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
         except Exception as e:
             status= 424 # Failed Dependency
             # Return an error response  
-            return jsonify({'error': f'{e}'}), status
+            return jsonify({'error': f'{e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
 
         msg= f'\n{result.stdout}'
         if len(result.stderr) > 0:
@@ -169,7 +169,7 @@ def create_blueprint(base_url):
 
         namespace= current_app.config.get('NAMESPACE', 'default')
 
-        # Run kubectl to get pods in JSON format
+        # Run kubectl to get pods 
         command= ["kubectl", "get", "pods", "-n", namespace, "-o", "json"]
         try:
             result= subprocess.run(command, capture_output=True, text=True, check=True)
@@ -177,11 +177,11 @@ def create_blueprint(base_url):
             status= 424 # Failed Dependency
             # Return an error response        
             msg= f'Error: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
+            return jsonify({"error": msg, 'ns': namespace}), status
         except Exception as e:
             status= 424 # Failed Dependency
             # Return an error response  
-            return jsonify({'error': f'{e}'}), status
+            return jsonify({'error': f'{e}', 'ns': namespace}), status
 
         # Parse JSON
         pods= json.loads(result.stdout)
@@ -254,16 +254,16 @@ def create_blueprint(base_url):
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
-            msg= f'Error: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
+            msg= f'Error delete deployment: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
         except Exception as e:
             status= 424 # Failed Dependency
             # Return an error response  
-            return jsonify({'error': f'{e}'}), status
+            return jsonify({'error': f'Error delete deployment: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
         if len(result.stderr) > 0:
             status= 400 # Failed Dependency
-            msg= f'Error: {result.stderr}'
-            return jsonify({'error': f'{msg}'}), status
+            msg= f'Error delete deployment: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
 
         # Delete the service
         try:
@@ -271,16 +271,16 @@ def create_blueprint(base_url):
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
-            msg= f'Error: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
+            msg= f'Error delete service: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
         except Exception as e:
             status= 424 # Failed Dependency
             # Return an error response  
-            return jsonify({'error': f'{e}'}), status
+            return jsonify({'error': f'Error delete service: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
         if len(result.stderr) > 0:
             status= 400 # Failed Dependency
-            msg= f'Error: {result.stderr}'
-            return jsonify({'error': f'{msg}'}), status
+            msg= f'Error delete service: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
 
         # Delete the ingress resource
         try:
@@ -288,16 +288,16 @@ def create_blueprint(base_url):
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
-            msg= f'Error: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
+            msg= f'Error delete ingress: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
         except Exception as e:
             status= 424 # Failed Dependency
             # Return an error response  
-            return jsonify({'error': f'{e}'}), status
+            return jsonify({'error': f'Error delete ingress: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
         if len(result.stderr) > 0:
             status= 400 # Failed Dependency
-            msg= f'Error: {result.stderr}'
-            return jsonify({'error': f'{msg}'}), status
+            msg= f'Error delete ingress: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
 
         # Return a response
         return jsonify({
@@ -323,14 +323,14 @@ def create_blueprint(base_url):
             status= 400
             return jsonify({'error': 'Error: Parameter >pod_name< is required'}), status
         SHOW_ROWS= inputData.get('show_rows')
-        if not POD_NAME:
+        if not SHOW_ROWS:
             status= 400
             return jsonify({'error': 'Error: Parameter >show_rows< is required'}), status
         if SHOW_ROWS not in ['ALL', 'TOP', 'BOTTOM']:
             status= 400
             return jsonify({'error': 'Error: Parameter >show_rows< must be either >ALL< or >TOP< or >BOTTOM<'}), status
         NUM_ROWS= int(inputData.get('num_rows'))
-        if not POD_NAME:
+        if not NUM_ROWS:
             status= 400
             return jsonify({'error': 'Error: Parameter >num_rows< is required'}), status
         if NUM_ROWS < 0:
@@ -340,7 +340,7 @@ def create_blueprint(base_url):
         # get parameters from config or use default
         namespace= current_app.config.get('NAMESPACE', 'default')
 
-        # Define the command to get pod name
+        # Define the command to get podname
         command= f"kubectl get pods --namespace {namespace} | grep {POD_NAME}"
 
         # get pod name
@@ -351,20 +351,20 @@ def create_blueprint(base_url):
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
-            msg= f'Error: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
+            msg= f'Error get podname: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'pod_name': POD_NAME}), status
         except Exception as e:
             status= 424 # Failed Dependency
             # Return an error response  
-            return jsonify({'error': f'{e}'}), status
+            return jsonify({'error': f'Error get podname: {e}', 'ns': namespace, 'pod_name': POD_NAME}), status
         if len(result.stderr) > 0:
             status= 400 # Failed Dependency
-            msg= f'Error: {result.stderr}'
-            return jsonify({'error': f'{msg}'}), status
+            msg= f'Error get podname: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'pod_name': POD_NAME}), status
         if result.stdout[0:5] == 'Error':
             status= 400 # Failed Dependency
-            msg= f'Error: {result.stdout}'
-            return jsonify({'error': f'{msg}'}), status
+            msg= f'Error get podname: {result.stdout}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'pod_name': POD_NAME}), status
         if not result.stdout:
             status= 404 # Not Found
             return jsonify({'error': f'Pod with name "{POD_NAME}" not found in namespace "{namespace}".'}), status
@@ -389,20 +389,20 @@ def create_blueprint(base_url):
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
-            msg= f'Error: {e.stderr.strip()}'
-            return jsonify({"error": msg}), status
+            msg= f'Error get log: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'pod_name': POD_NAME}), status
         except Exception as e:
             status= 424 # Failed Dependency
             # Return an error response  
-            return jsonify({'error': f'{e}'}), status
+            return jsonify({'error': f'Error get log: {e}', 'ns': namespace, 'pod_name': POD_NAME}), status
         if len(result.stderr) > 0:
             status= 400 # Failed Dependency
-            msg= f'Error: {result.stderr}'
-            return jsonify({'error': f'{msg}'}), status
+            msg= f'Error get log: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'pod_name': POD_NAME}), status
         if result.stdout[0:5] == 'Error':
             status= 400 # Failed Dependency
-            msg= f'Error: {result.stdout}'
-            return jsonify({'error': f'{msg}'}), status
+            msg= f'Error get log: {result.stdout}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'pod_name': POD_NAME}), status
 
         if SHOW_ROWS == 'TOP':
             log= log[:NUM_ROWS] # Limit the number of log lines to top NUM_ROWS
@@ -417,4 +417,153 @@ def create_blueprint(base_url):
             'pod_name': podname
             }), 200
 
+##########################################################################################
+    @bp.route('/getlog-mas', methods=['POST'])
+    def getlog_mas():
+        endpoint_available= current_app.config.get('GETLOG_MAS', False)
+        if not endpoint_available:
+            return jsonify({'error': 'Endpoint "/getlog-mas" not available - Check pull-scr config settings if endpoint is switched on.'}), 404
+
+        # Get JSON data from the request
+        inputData= request.get_json()
+
+        # set http status code
+        status= 200
+
+        # get input parameters
+        SHOW_ROWS= inputData.get('show_rows')
+        if not SHOW_ROWS:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >show_rows< is required'}), status
+        if SHOW_ROWS not in ['ALL', 'TOP', 'BOTTOM']:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >show_rows< must be either >ALL< or >TOP< or >BOTTOM<'}), status
+        NUM_ROWS= int(inputData.get('num_rows'))
+        if not NUM_ROWS:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >num_rows< is required'}), status
+        if NUM_ROWS < 0:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >num_rows< must be greater than or equal to 0'}), status
+
+        prefix_pod_name= 'sas-microanalytic-score'
+        # Define the command to get MAS pod namespace
+        command= f"kubectl get pods --all-namespaces --no-headers | grep '{prefix_pod_name}' " +"| awk '{print $1}'"
+
+        # get name space
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)            
+            namespace= result.stdout.strip().split('\n')
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response        
+            msg= f'Error get namespace: {e.stderr.strip()}'
+            return jsonify({"error": msg}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response  
+            return jsonify({'error': f'Error get namespace: {e}'}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error get namespace: {result.stderr}'
+            return jsonify({'error': f'{msg}'}), status
+        if result.stdout[0:5] == 'Error':
+            status= 400 # Failed Dependency
+            msg= f'Error get namespace: {result.stdout}'
+            return jsonify({'error': f'{msg}'}), status
+        if not result.stdout:
+            status= 404 # Not Found
+            return jsonify({'error': f'Namespace not found for MAS pod.'}), status
+        if len(result.stdout.splitlines()) > 1:
+            status= 400 # Bad Request
+            return jsonify({'error': f'Multiple pods found with name "{prefix_pod_name}" in namespace "{namespace}". Please specify a more specific pod name.'}), status
+
+        # Define the command to get pod name
+        #command= f"kubectl get pods --namespace {namespace} | grep {prefix_pod_name}"
+        #command= ["kubectl", "get", "pods", "--namespace", namespace, "|", "grep", prefix_pod_name]
+        command= ["kubectl", "get", "pods", "-n", "viya4"]
+
+        # get podname
+        try:
+            # Run the command
+            result = subprocess.run(command, check=True, capture_output=True, text=True)
+
+            # Process the output
+            lines = result.stdout.strip().split('\n')
+            matching_pods = [line.split()[0] for line in lines if prefix_pod_name in line]
+            podname = matching_pods[0] if matching_pods else None
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response        
+            msg= f'Error get podname: {e.stderr.strip()}'
+            return jsonify({"error": msg}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response  
+            return jsonify({'error': f'Error  get podname: {e}'}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error get podname: {result.stderr}'
+            return jsonify({'error': f'{msg}'}), status
+        if result.stdout[0:5] == 'Error':
+            status= 400 # Failed Dependency
+            msg= f'Error get podname: {result.stdout}'
+            return jsonify({'error': f'{msg}'}), status
+        if not result.stdout:
+            status= 404 # Not Found
+            return jsonify({'error': f'Pod with name "{prefix_pod_name}" not found in namespace "{namespace}".'}), status
+#        if len(result.stdout.splitlines()) > 1:
+#            status= 400 # Bad Request
+#            return jsonify({'error': f'Multiple pods found with name "{prefix_pod_name}" in namespace "{namespace}". Please specify a more specific pod name.'}), status
+
+        #podname= podname[0:podname.find(' ')]  # Extract the pod name from the output
+
+        # Define the command to get log
+        namespace= 'viya4'
+#        command= f"kubectl logs --namespace {namespace} {podname}"
+        command= ["kubectl", "logs", "--namespace", namespace, "sas-microanalytic-score-865c65779b-5k7t6", "-c", "sas-microanalytic-score"]
+
+        log= []
+        try:
+            # Run the command
+            result= subprocess.run(command, capture_output=True, text=True)
+
+            # get log line by line
+            for line in result.stdout.splitlines():
+                log.append(line.strip())
+        
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response        
+            msg= f'Error get log: {e.stderr.strip()}'
+            return jsonify({"error": msg,'ns': namespace, 'pod_name': podname}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response  
+            return jsonify({'error': f'Error  get log: {e}','ns': namespace, 'pod_name': podname}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error get log: {result.stderr}'
+            return jsonify({'error': f'{msg}','ns': namespace, 'pod_name': podname}), status
+        if result.stdout[0:5] == 'Error':
+            status= 400 # Failed Dependency
+            msg= f'Error get log: {result.stdout}'
+            return jsonify({'error': f'{msg}','ns': namespace, 'pod_name': podname}), status
+
+        if SHOW_ROWS == 'TOP':
+            log= log[:NUM_ROWS] # Limit the number of log lines to top NUM_ROWS
+        elif SHOW_ROWS == 'BOTTOM':
+            log= log[len(log)-NUM_ROWS:] # Limit the number of log lines to bottom NUM_ROWS
+
+        log.insert(0, 'Log')  # Add a header to the log list
+        # Return the list as JSON
+        return jsonify({
+            'log':log,
+            'ns': namespace,    
+            'pod_name': podname
+            }), 200
+
+##########################################################################################
+    # Return the Blueprint object
     return bp

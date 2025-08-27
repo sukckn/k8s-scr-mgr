@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: scr # namespace to load the scr containers
-  name: pull-scr-manager
+  namespace: scr # namesspace where scr containers are loaded
+  name: k8s-scr-adm
 rules:
 - apiGroups: ["apps"]
   resources: ["deployments", "replicasets"]
@@ -17,13 +17,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: pull-scr-manager-binding
-  namespace: scr # namespace to load the scr containers
+  name: k8s-scr-adm-binding
+  namespace: scr # namesspace where scr containers are loaded
 subjects:
 - kind: ServiceAccount
   name: default
-  namespace: default # namespace pull-scr is running
+  namespace: default # namesspace where k8s-scr-adm container is loaded
 roleRef:
   kind: Role
-  name: pull-scr-manager
+  name: k8s-scr-adm
   apiGroup: rbac.authorization.k8s.io
