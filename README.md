@@ -74,11 +74,11 @@ Format to create a ConfigMap:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
 
 Use the following commands to create the required ConfigMaps:
->❗**Note**: By default, *k8s-scr-adm* is deployed in namespace```default```. If you use a different namespace, **update the export command** below:
+>❗**Note**: By default, *k8s-scr-adm* is deployed in namespace```default```. If you use a different namespace, **set K8S_SCR_ADM_NAMESPACE to the correct value** below:
 
 ```
 # Set the namespace (!!change if needed!!)
-export K8S_SCR_ADM_NAMESPACE="default"
+K8S_SCR_ADM_NAMESPACE="default"
 
 # Create ConfigMap for k8s-scr-adm configuration
 kubectl create configmap k8s-scr-adm-config \
