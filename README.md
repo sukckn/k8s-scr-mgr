@@ -52,6 +52,7 @@ Edit file *k8s-scr-mgr.config* to set the required parameters for your *k8s-scr-
 | PORT | Target port for the *k8s-scr-mgr* container. |
 | HOST | External host address (typically the hostname) where *k8s-scr-mgr* is accessible. |
 | NAMESPACE | Kubernetes namespace dedicated to *k8s-scr-mgr*<br>**Default:** scr |
+| CONTAINER_PREFIX | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>***Default:*** no prefix
 | LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** False |
 | PULL_SCR | Enables the /k8s-scr-mgr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** False |
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** False |
