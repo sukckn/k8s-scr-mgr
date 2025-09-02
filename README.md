@@ -182,7 +182,7 @@ If the SCR image accesses a database, you must create a database secret. You can
     * [k8s-scr-mgr-role.yaml](./data/yaml/k8s-scr-mgr-role.yaml)
     * [mas-log-reader.yaml](./data/yaml/mas-log-reader.yaml)<br>
 
-    **Open file k8s-scr-mgr.yaml and set the host URL**. At lines 102 and 105 set the URL where you deploy K8S SCR Manager. 
+2. Open file k8s-scr-mgr.yaml and set the host URL. At lines 102 and 105 set the URL where you deploy K8S SCR Manager to. 
     
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *k8s-scr-mgr-role.yaml* to the correct namespace.
 
@@ -190,14 +190,14 @@ If the SCR image accesses a database, you must create a database secret. You can
 
     >❗**Note**: In file mas-log-reader.yaml verify that the namespace for Viya is correct. By default it is pointing at *namespace: viya4*.
 
-2. Apply the deployment:
+3. Apply the deployment:
     ```
     cd ~/k8s-scr-mgr
     kubectl apply -f k8s-scr-mgr.yaml
     kubectl apply -f k8s-scr-mgr-role.yaml 
     kubectl apply -f mas-log-reader.yaml 
     ```
-3. Verify Deployment<br>
+4. Verify Deployment<br>
     After applying both files, verify that the *k8s-scr-mgr* service is running in Kubernetes.
     ```
     kubectl get pods --namespace default | grep k8s-scr-mgr
