@@ -4,21 +4,21 @@ from datetime import datetime, timezone
 import subprocess
 
 def create_blueprint(base_url):
-    # Create a Blueprint for the k8s-scr-adm routes
-    bp= Blueprint('k8s-scr-adm', __name__, url_prefix=base_url)
+    # Create a Blueprint for the k8s-scr-mgr routes
+    bp= Blueprint('k8s-scr-mgr', __name__, url_prefix=base_url)
 
 ##########################################################################################
     @bp.route('/', methods=['GET'])
     @bp.route('/ping', methods=['GET'])
     def ping():
-        return jsonify({'message': 'Welcome to Pull SCR Service (Version 0.18)!'}), 200
+        return jsonify({'message': 'Welcome to K8S SCR Manager Service (Version 0.18)!'}), 200
 
 ##########################################################################################
     @bp.route('/pull-scr', methods=['POST'])
     def pull_scr():
         endpoint_available= current_app.config.get('PULL_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/pull-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/pull-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -56,6 +56,10 @@ def create_blueprint(base_url):
         namespace= current_app.config.get('NAMESPACE', 'default')
         host= current_app.config.get('HOST', '127.0.0.1')
         port= current_app.config.get('PORT', '8080')
+        cont_prefix= current_app.config.get('CONTAINER_PREFIX', '')
+        # if a prefix for the SCR container is to be set we add an underscore to it
+        if len(cont_prefix) > 0:
+            cont_prefix= cont_prefix + '_'
 
         # Prepare the environment variables for the yaml file
         env= ''
@@ -83,6 +87,7 @@ def create_blueprint(base_url):
         yaml_content= yaml_content.replace('<NAMESPACE>', namespace)
         yaml_content= yaml_content.replace('<HOST>', host)
         yaml_content= yaml_content.replace('<PORT>', port)
+        yaml_content= yaml_content.replace('<PREFIX>', cont_prefix)
         yaml_content= yaml_content.replace('<ENV-VARS>', env)
         yaml_content= yaml_content.replace('<DB-SECRET-MOUNT>', db_secret_mount)
         yaml_content= yaml_content.replace('<DB-SECRET-VOLUME>', db_secret_volume)
@@ -119,7 +124,7 @@ def create_blueprint(base_url):
     def restart_scr():
         endpoint_available= current_app.config.get('RESTART_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/restart-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/restart-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -164,7 +169,7 @@ def create_blueprint(base_url):
     def list_scr():
         endpoint_available= current_app.config.get('LIST_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/list-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/list-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
         namespace= current_app.config.get('NAMESPACE', 'default')
 
@@ -228,7 +233,7 @@ def create_blueprint(base_url):
     def delete_scr():
         endpoint_available= current_app.config.get('DELETE_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/delete-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/delete-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -308,7 +313,7 @@ def create_blueprint(base_url):
     def getlog_scr():
         endpoint_available= current_app.config.get('GETLOG_SCR', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/getlog-scr" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/getlog-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()
@@ -421,7 +426,7 @@ def create_blueprint(base_url):
     def getlog_mas():
         endpoint_available= current_app.config.get('GETLOG_MAS', False)
         if not endpoint_available:
-            return jsonify({'error': 'Endpoint "/getlog-mas" not available - Check k8s-scr-adm config settings if endpoint is switched on.'}), 404
+            return jsonify({'error': 'Endpoint "/getlog-mas" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
         # Get JSON data from the request
         inputData= request.get_json()

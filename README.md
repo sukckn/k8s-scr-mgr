@@ -180,8 +180,10 @@ If the SCR image accesses a database, you must create a database secret. You can
 1. Copy the following files to ```~/k8s-scr-mgr```:
     * [k8s-scr-mgr.yaml](./data/yaml/k8s-scr-mgr.yaml)
     * [k8s-scr-mgr-role.yaml](./data/yaml/k8s-scr-mgr-role.yaml)
-    * [mas-log-reader.yaml](./data/yaml/mas-log-reader.yaml)<br><br>
+    * [mas-log-reader.yaml](./data/yaml/mas-log-reader.yaml)<br>
 
+    **Open file k8s-scr-mgr.yaml and set the host URL**. At lines 102 and 105 set the URL where you deploy K8S SCR Manager. 
+    
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *k8s-scr-mgr-role.yaml* to the correct namespace.
 
     >❗**Note**: By default, *k8s-scr-mgr* is deployed in namespace```default```. If you use a different namespace, update *namespace: default* in *k8s-scr-mgr.yaml* and *k8s-scr-mgr-role.yaml* to the correct namespace.

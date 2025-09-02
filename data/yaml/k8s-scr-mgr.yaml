@@ -1,35 +1,35 @@
 #############################################################################################################################################
-# This YAML loads container k8s-scr-adm into Kubernetes
+# This YAML loads container k8s-scr-mgr into Kubernetes
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# - ensure setting for image is correct and pointing to the correct container image.
+# - ensure the 'host' value is pointing to the correct server.
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# - run file on server where this yaml is stored: kubectl apply -f k8s-scr-adm.yaml
+# - run file on server where this yaml is stored: kubectl apply -f k8s-scr-mgr.yaml
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-# Call container: https://<Server>/k8s-scr-adm/<endpoint> 
+# Call container: https://<Server>/k8s-scr-mgr/<endpoint> 
 #############################################################################################################################################
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: k8s-scr-adm
+  name: k8s-scr-mgr
   namespace: default
   labels:
     app-owner: viyademo01
-    app.kubernetes.io/name: k8s-scr-adm
+    app.kubernetes.io/name: k8s-scr-mgr
 spec:
   replicas: 1
   selector:
     matchLabels:
       app-owner: viyademo01
-      app.kubernetes.io/name: k8s-scr-adm
+      app.kubernetes.io/name: k8s-scr-mgr
   template:
     metadata:
       labels:
         app-owner: viyademo01
-        app.kubernetes.io/name: k8s-scr-adm
+        app.kubernetes.io/name: k8s-scr-mgr
     spec:
       containers:
-      - name: k8s-scr-adm
-        image: ghcr.io/sukckn/k8s-scr-adm:latest
+      - name: k8s-scr-mgr
+        image: ghcr.io/sukckn/k8s-scr-mgr:latest
         imagePullPolicy: Always
         ports:
         - name: http
@@ -40,10 +40,10 @@ spec:
             mountPath: /tmp/config
             subPath: config
           - name: yaml-template
-            mountPath: /k8s-scr-adm/template/scr-template.yaml
+            mountPath: /k8s-scr-mgr/template/scr-template.yaml
             subPath: template
-          - name: k8s-scr-adm-config
-            mountPath: /k8s-scr-adm/app/config.py
+          - name: k8s-scr-mgr-config
+            mountPath: /k8s-scr-mgr/app/config.py
             subPath: config
         securityContext:
           capabilities:
@@ -62,18 +62,18 @@ spec:
         - name: yaml-template
           configMap:
             name: scr-yaml-template
-        - name: k8s-scr-adm-config
+        - name: k8s-scr-mgr-config
           configMap:
-            name: k8s-scr-adm-config
+            name: k8s-scr-mgr-config
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: k8s-scr-adm
+  name: k8s-scr-mgr
   namespace: default
   labels:
     app-owner: viyademo01
-    app.kubernetes.io/name: k8s-scr-adm
+    app.kubernetes.io/name: k8s-scr-mgr
 spec:
   ports:
   - name: http
@@ -82,33 +82,33 @@ spec:
     targetPort: 5000
   selector:
     app-owner: viyademo01
-    app.kubernetes.io/name: k8s-scr-adm
+    app.kubernetes.io/name: k8s-scr-mgr
   type: ClusterIP
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: k8s-scr-adm
+  name: k8s-scr-mgr
   namespace: default
   labels:
     app-owner: viyademo01
-    app.kubernetes.io/name: k8s-scr-adm
+    app.kubernetes.io/name: k8s-scr-mgr
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - ck05-sukckn.net.sas.com
+    - url.myserver.com # set url for the server where you deploy k8s-scr-mgr
     secretName: net-sas-com-app-certs
   rules:
-  - host: ck05-sukckn.net.sas.com
+  - host: url.myserver.com # set url for the server where you deploy k8s-scr-mgr
     http:
       paths:
-      - path: /k8s-scr-adm
+      - path: /k8s-scr-mgr
         pathType: Prefix
         backend:
           service:
-            name: k8s-scr-adm
+            name: k8s-scr-mgr
             port:
               number: 80

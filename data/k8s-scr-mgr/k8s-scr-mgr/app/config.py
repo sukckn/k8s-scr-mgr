@@ -1,8 +1,9 @@
 class Config:
-    BASE_URL= '/k8s-scr-adm'
+    BASE_URL= '/k8s-scr-scr'
     PORT= '8080'
     HOST= 'my-server.sas.com'
     NAMESPACE= 'scr'
+    CONTAINER_PREFIX= 'scr'
     VIYA_NAMESPACE= 'viya4'
     MAS_POD= 'sas-microanalytic-score'
     LIST_SCR= True
