@@ -4,7 +4,7 @@
 `k8s-scr-mgr` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry but developers may not have direct access to the Kubernetes cluster.
 
 ## Features
-Once deployed, the `k8s-scr-mgr` container provides a service accessible via custom step *ID - K8S SCR Admin* in SAS Studio to:
+Once deployed, the `k8s-scr-mgr` container provides a service accessible via custom step *ID - K8S SCR Manager* in SAS Studio to:
 
 🔷 **Load** SCR images into Kubernetes<br>
 🔷 **Restart** launched SCR containers<br>
@@ -74,27 +74,27 @@ Format to create a ConfigMap:<br>
 ```kubectl create configmap <config map name> --from-file=<key>=<file> --namespace=<namespace>```
 
 Use the following commands to create the required ConfigMaps:
->❗**Note**: By default, *k8s-scr-mgr* is deployed in namespace```default```. If you use a different namespace, **set K8S_SCR_ADM_NAMESPACE to the correct value** below:
+>❗**Note**: By default, *k8s-scr-mgr* is deployed in namespace```default```. If you use a different namespace, **set K8S_SCR_MGR_NAMESPACE to the correct value** below:
 
 ```
 # Set the namespace (!!change if needed!!)
-K8S_SCR_ADM_NAMESPACE="default"
+K8S_SCR_MGR_NAMESPACE="default"
 
 # Create ConfigMap for k8s-scr-mgr configuration
 kubectl create configmap k8s-scr-mgr-config \
   --from-file=config=$HOME/k8s-scr-mgr/k8s-scr-mgr.config \
-  --namespace=$K8S_SCR_ADM_NAMESPACE
+  --namespace=$K8S_SCR_MGR_NAMESPACE
 
 # Create ConfigMap for the SCR template
 kubectl create configmap scr-yaml-template \
   --from-file=template=$HOME/k8s-scr-mgr/scr-template.yaml \
-  --namespace=$K8S_SCR_ADM_NAMESPACE
+  --namespace=$K8S_SCR_MGR_NAMESPACE
 
 # Create ConfigMap for kubectl configuration. 
 # Assuming the kubectl config file is in default location in the home directory
 kubectl create configmap kubectl-config \
   --from-file=config=$HOME/.kube/config \
-  --namespace=$K8S_SCR_ADM_NAMESPACE
+  --namespace=$K8S_SCR_MGR_NAMESPACE
 ```
 ### Load into Kubernetes
 #### 1. Create Image Pull Secret
@@ -202,8 +202,8 @@ If the SCR image accesses a database, you must create a database secret. You can
     ```
 
 ---
-## ID - K8S SCR Admin
-The **ID - K8S SCR Admin** custom step allows you to interact with the k8s-scr-mgr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
+## ID - K8S SCR Manager
+The **ID - K8S SCR Manager** custom step allows you to interact with the k8s-scr-mgr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
 
 🔷 **Load** SCR images into Kubernetes<br>
 🔷 **Restart** launched SCR containers<br>
@@ -214,10 +214,10 @@ The **ID - K8S SCR Admin** custom step allows you to interact with the k8s-scr-m
 
 ---
 ### Importing the Custom Step
-To import custom step *ID - K8S SCR Admin*:
+To import custom step *ID - K8S SCR Manager*:
 * Open SAS Studio.
 * In your home folder (My Folder), create a sub-folder named ```custom steps```.
-* Upload file [ID - K8S SCR Admin.step](./data/custom_step/ID%20-%20K8S%20SCR%20Admin.step) into the *custom steps* folder.
+* Upload file [ID - K8S SCR Manager.step](./data/custom_step/ID%20-%20K8S%20SCR%20Admin.step) into the *custom steps* folder.
 
 ---
 ### User Interface
@@ -331,7 +331,7 @@ If *k8s-scr-mgr* is not deployed to namespace ```default```, update the URL usin
 ```
 <pod-name>.<namespace>.svc.cluster.local
 ```
-Alternatively, you can set the Service URL by setting macro ```K8S_SCR_ADM_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
+Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
 ```
-%let k8s_scr_adm_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
+%let k8s_scr_mgr_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
 ```
