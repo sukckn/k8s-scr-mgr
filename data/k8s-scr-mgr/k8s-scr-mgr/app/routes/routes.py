@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timezone
 import subprocess
 
-def create_blueprint(base_url):
+def create_blueprint(base_url, k8s_scr_mgr_version):
     # Create a Blueprint for the k8s-scr-mgr routes
     bp= Blueprint('k8s-scr-mgr', __name__, url_prefix=base_url)
 
@@ -11,7 +11,7 @@ def create_blueprint(base_url):
     @bp.route('/', methods=['GET'])
     @bp.route('/ping', methods=['GET'])
     def ping():
-        return jsonify({'message': 'Welcome to K8S SCR Manager Service (Version 0.18)!'}), 200
+        return jsonify({'message': f'Welcome to K8S SCR Manager Service (Version {k8s_scr_mgr_version})!'}), 200
 
 ##########################################################################################
     @bp.route('/pull-scr', methods=['POST'])
@@ -116,7 +116,7 @@ def create_blueprint(base_url):
         # Return a response
         return jsonify({
             'message': msg,
-            'url': f'https://{host}:{port}/{SCR_NAME}'
+            'url': f'https://{host}/{SCR_NAME}'
                     }), 200
 
 ##########################################################################################
@@ -161,7 +161,7 @@ def create_blueprint(base_url):
         # Return a response
         return jsonify({
             'message': msg,
-            'url': f'https://{host}:{port}/{DEPLOYMENT_NAME}'
+            'url': f'https://{host}/{DEPLOYMENT_NAME}'
                     }), 200
 
 ##########################################################################################

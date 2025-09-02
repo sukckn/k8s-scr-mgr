@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scr-<SCR-NAME>
+  name: <PREFIX><SCR-NAME>
   namespace: <NAMESPACE>
   labels:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
 spec:
   replicas: 1
   selector:
     matchLabels:
       app-owner: <APP-OWNER>
-      app.kubernetes.io/name: scr-<SCR-NAME>
+      app.kubernetes.io/name: <PREFIX><SCR-NAME>
   template:
     metadata:
       labels:
         app-owner: <APP-OWNER>
-        app.kubernetes.io/name: scr-<SCR-NAME>
+        app.kubernetes.io/name: <PREFIX><SCR-NAME>
     spec:
       containers:
-      - name: scr-<SCR-NAME>
+      - name: <PREFIX><SCR-NAME>
         image: decisioning.azurecr.io/<SCR-NAME>:<SCR-TAG>
         imagePullPolicy: <IMAGE-PULL-POLICY>
         ports:
@@ -50,11 +50,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: scr-<SCR-NAME>
+  name: <PREFIX><SCR-NAME>
   namespace: <NAMESPACE>
   labels:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
 spec:
   ports:
   - name: http
@@ -63,17 +63,17 @@ spec:
     targetPort: <PORT>
   selector:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
   type: ClusterIP
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: scr-<SCR-NAME>
+  name: <PREFIX><SCR-NAME>
   namespace: <NAMESPACE>
   labels:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
@@ -90,6 +90,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: scr-<SCR-NAME>
+            name: <PREFIX><SCR-NAME>
             port:
               number: 80
