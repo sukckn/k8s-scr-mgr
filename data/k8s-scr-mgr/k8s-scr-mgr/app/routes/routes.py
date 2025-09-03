@@ -27,10 +27,12 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         status= 200
 
         # get input parameters
-        SCR_NAME= inputData.get('scr_name')
-        if not SCR_NAME:
+        IMAGE_NAME= inputData.get('image_name')
+        if not IMAGE_NAME:
             status= 400
-            return jsonify({'error': 'Error: Parameter >scr_name< is required'}), status
+            return jsonify({'error': 'Error: Parameter >image_name< is required'}), status
+        IMAGE_NAME= IMAGE_NAME.lower() # Kubernetes image names must be lowercase
+        SCR_NAME= IMAGE_NAME.replace('_', '-') # Kubernetes cannot contain underscores
 
         SCR_TAG= inputData.get('scr_tag')
         if not SCR_TAG:
@@ -57,9 +59,9 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         host= current_app.config.get('HOST', '127.0.0.1')
         port= current_app.config.get('PORT', '8080')
         cont_prefix= current_app.config.get('CONTAINER_PREFIX', '')
-        # if a prefix for the SCR container is to be set we add an underscore to it
+        # if a prefix for the SCR container is to be set we add an dash (-) to it
         if len(cont_prefix) > 0:
-            cont_prefix= cont_prefix + '_'
+            cont_prefix= cont_prefix + '-'
 
         # Prepare the environment variables for the yaml file
         env= ''
@@ -80,7 +82,8 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         with open('./template/scr-template.yaml', 'r') as file:
             yaml_template= file.read()
 
-        yaml_content= yaml_template.replace('<SCR-NAME>', SCR_NAME)
+        yaml_content= yaml_template.replace('<IMAGE-NAME>', IMAGE_NAME)
+        yaml_content= yaml_content.replace('<SCR-NAME>', SCR_NAME)
         yaml_content= yaml_content.replace('<APP-OWNER>', APP_OWNER)
         yaml_content= yaml_content.replace('<SCR-TAG>', SCR_TAG)
         yaml_content= yaml_content.replace('<IMAGE-PULL-POLICY>', IMAGE_PULL_POLICY)

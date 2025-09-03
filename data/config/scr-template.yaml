@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: <PREFIX><SCR-NAME>
-        image: decisioning.azurecr.io/<SCR-NAME>:<SCR-TAG>
+        image: decisioning.azurecr.io/<IMAGE-NAME>:<SCR-TAG>
         imagePullPolicy: <IMAGE-PULL-POLICY>
         ports:
         - name: http
