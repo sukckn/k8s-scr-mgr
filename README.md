@@ -220,7 +220,7 @@ The **ID - K8S SCR Manager** custom step allows you to interact with the k8s-scr
 To import custom step *ID - K8S SCR Manager*:
 * Open SAS Studio.
 * In your home folder (My Folder), create a sub-folder named ```custom steps```.
-* Upload file [ID - K8S SCR Manager.step](./data/custom_step/ID%20-%20K8S%20SCR%20Admin.step) into the *custom steps* folder.
+* Upload file [ID - K8S SCR Manager.step](./data/custom_step/ID%20-%20K8S%20SCR%20Manager.step) into the *custom steps* folder.
 
 ---
 ### User Interface
