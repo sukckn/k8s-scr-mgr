@@ -53,6 +53,8 @@ Edit file *k8s-scr-mgr.config* to set the required parameters for your *k8s-scr-
 | HOST | External host address (typically the hostname) where *k8s-scr-mgr* is accessible. |
 | NAMESPACE | Kubernetes namespace dedicated to *k8s-scr-mgr*<br>**Default:** scr |
 | CONTAINER_PREFIX | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>***Default:*** no prefix
+| VIYA_NAMESPACE | The Kubernetes namespace where Viya is installed |
+| MAS_POD | The prefix of the MAS POD. Default is *sas-microanalytic-score* |
 | LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** False |
 | PULL_SCR | Enables the /k8s-scr-mgr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** False |
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** False |
@@ -337,4 +339,5 @@ If *k8s-scr-mgr* is not deployed to namespace ```default```, update the URL usin
 Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
 ```
 %let k8s_scr_mgr_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
+
 ```
