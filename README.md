@@ -70,7 +70,7 @@ Download file [scr-template.yaml](./data/config/scr-template.yaml) and copy it i
 
 #### 4. Kubernetes config file
 
-We use the Kubernetes config information from your home directory, assuming the Kubernetes config in is ```$HOME/.kube/config```. If the Kubernetes config file is in a different location you need to change the command *3. Create ConfigMap for kubectl configuration* in the next step (*Create ConfigMaps*) to point to your Kubernetes config file.
+We use the Kubernetes config information from your home directory, assuming the Kubernetes config in is ```$HOME/.kube/config```. If the Kubernetes config file is in a different location you need to change the command <br>*3. Create ConfigMap for kubectl configuration* in the next step (*Create ConfigMaps*) to point to your Kubernetes config file.
 
 #### 5. Create ConfigMaps
 
@@ -356,3 +356,4 @@ Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL``
 %let k8s_scr_mgr_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
 
 ```
+
