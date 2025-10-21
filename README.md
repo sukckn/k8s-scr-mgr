@@ -104,7 +104,7 @@ kubectl create configmap kubectl-config \
 #### 1. Create Image Pull Secret
 To load *k8s-scr-mgr* into Kubernetes, you must first create a Kubernetes secret to pull the SCR image from your Docker registry.
 
-1. Copy the file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml) to the server directory ```~/k8s-scr-mgr```.
+1. Download file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml)
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-docker.yaml* to the correct namespace.
 
 2. Open the file in an editor and replace the placeholder &lt;DOCKER-PULL-SECRET&gt; with your Docker registry credentials.
@@ -145,15 +145,19 @@ To load *k8s-scr-mgr* into Kubernetes, you must first create a Kubernetes secret
 
     📘 Refer to [Kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#registry-secret-existing-credentials) for more details on creating secrets from existing credentials.
 
-3. Register secret in Kubernetes.
+3. Copy the file to the server directory ```~/k8s-scr-mgr```.
+
+4. Register secret in Kubernetes.
     ```
     cd ~/k8s-scr-mgr
     kubectl apply -f scr-secret-docker.yaml
     ```
 ---
+
 #### 2. Create Database Secret
 If the SCR image accesses a database, you must create a database secret. You can skip this step if you are not accessing a database.
-1. Copy the file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml) to ```~/k8s-scr-mgr```
+
+1. Download file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml)
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-db.yaml* to the correct namespace.
 
 2. Open the file and replace &lt;DB-SECRET&gt; with your database connection string.
@@ -174,14 +178,16 @@ If the SCR image accesses a database, you must create a database secret. You can
 
     📘 See [Configuring a Database Connection](https://go.documentation.sas.com/doc/en/mascrtcdc/default/mascrtag/n15q5afwsfkjl5n1cfvcn7xz4x22.htm) for information on all supported databases.
 
-3. Register secret in Kubernetes.
+3. Copy the file to ```~/k8s-scr-mgr```
+
+4. Register secret in Kubernetes.
     ```
     cd ~/k8s-scr-mgr
     kubectl apply -f scr-secret-db.yaml
     ```
 ---
 #### 3. Deploy k8s-scr-mgr to Kubernetes
-1. Copy the following files to ```~/k8s-scr-mgr```:
+1. Download the following files:
     * [k8s-scr-mgr.yaml](./data/yaml/k8s-scr-mgr.yaml)
     * [k8s-scr-mgr-role.yaml](./data/yaml/k8s-scr-mgr-role.yaml)
     * [mas-log-reader.yaml](./data/yaml/mas-log-reader.yaml)<br>
@@ -194,20 +200,23 @@ If the SCR image accesses a database, you must create a database secret. You can
 
     >❗**Note**: In file mas-log-reader.yaml verify that the namespace for Viya is correct. By default it is pointing at *namespace: viya4*.
 
-3. Apply the deployment:
+3. Copy the files to ```~/k8s-scr-mgr```:
+
+4. Apply the deployment:
     ```
     cd ~/k8s-scr-mgr
     kubectl apply -f k8s-scr-mgr.yaml
     kubectl apply -f k8s-scr-mgr-role.yaml 
     kubectl apply -f mas-log-reader.yaml 
     ```
-4. Verify Deployment<br>
+5. Verify Deployment<br>
     After applying both files, verify that the *k8s-scr-mgr* service is running in Kubernetes.
     ```
     kubectl get pods --namespace default | grep k8s-scr-mgr
     ```
 
 ---
+
 ## ID - K8S SCR Manager
 The **ID - K8S SCR Manager** custom step allows you to interact with the k8s-scr-mgr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
 
@@ -219,6 +228,7 @@ The **ID - K8S SCR Manager** custom step allows you to interact with the k8s-scr
 🔷 **Show MAS** log for information<br>
 
 ---
+
 ### Importing the Custom Step
 To import custom step *ID - K8S SCR Manager*:
 * Open SAS Studio.
@@ -226,6 +236,7 @@ To import custom step *ID - K8S SCR Manager*:
 * Upload file [ID - K8S SCR Manager.step](./data/custom_step/ID%20-%20K8S%20SCR%20Manager.step) into the *custom steps* folder.
 
 ---
+
 ### User Interface
 #### Modus
 Use this section to choose the operation you want to perform:
@@ -278,6 +289,7 @@ Set the number of environment variables you want to set for the scr container
 
 * **Deployment name**<br>
 Set the name of the scr deployment you want to re-start.
+
 ---
 
 #### Delete deployment
@@ -293,6 +305,7 @@ Set the name of the scr deployment you want to delete.
 Run the step to receive a list of all pods running in the namespace linked to k8s-scr-mgr.
 
 ---
+
 #### Get log
 ![](./images/get-log.jpg)
 
@@ -326,6 +339,7 @@ This indecates how many rows from the log will be shown.
 <br>
 
 ---
+
 ### Options
 ![](./images/options.jpg)
 
