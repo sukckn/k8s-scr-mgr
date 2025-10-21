@@ -42,34 +42,35 @@ cd k8s-scr-mgr
 
 ---
 #### 2. Configure k8s-scr-mgr
-Copy the following file into directory ```~/k8s-scr-mgr```:
-* [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config)
 
-Edit file *k8s-scr-mgr.config* to set the required parameters for your *k8s-scr-mgr* instance.
+Download file [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) and edit it to set the required parameters for your *k8s-scr-mgr* instance:
 | *Name* | *Comment* |
 | ---    | ---       |
 | BASE_URL | Base endpoint of the *k8s-scr-mgr* container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /k8s-scr-mgr |
 | PORT | Target port for the *k8s-scr-mgr* container. |
-| HOST | External host address (typically the hostname) where *k8s-scr-mgr* is accessible. |
+| HOST | External host address (typically the hostname) where *k8s-scr-mgr* is accessible. (E.g., myserver.sas.com) |
 | NAMESPACE | Kubernetes namespace dedicated to *k8s-scr-mgr*<br>**Default:** scr |
 | CONTAINER_PREFIX | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>***Default:*** no prefix
 | VIYA_NAMESPACE | The Kubernetes namespace where Viya is installed |
 | MAS_POD | The prefix of the MAS POD. Default is *sas-microanalytic-score* |
-| LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** False |
-| PULL_SCR | Enables the /k8s-scr-mgr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** False |
-| RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** False |
-| DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** False |
-| GETLOG_SCR | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>***Default:*** False |
-| GETLOG_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** False |
+| LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** True |
+| PULL_SCR | Enables the /k8s-scr-mgr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** True |
+| RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** True |
+| DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** True |
+| GETLOG_SCR | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>***Default:*** True |
+| GETLOG_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** True |
+
+Copy the following file into directory ```~/k8s-scr-mgr```
 
 #### 3. Review scr-template.yaml
-Copy the following file into directory ```~/k8s-scr-mgr```:
-* [scr-template.yaml](./data/config/scr-template.yaml)
 
 The file *scr-template.yaml* is a template used to generate Kubernetes manifests for SCR images. It uses tokens that are replaced at runtime. You may customize this file if needed before creating the ConfigMap.
 
+Download file [scr-template.yaml](./data/config/scr-template.yaml) and copy it into directory ```~/k8s-scr-mgr```:
+
 #### 4. Kubernetes config file
-We use the Kubernetes config information from your home directory, assuming the Kubernetes config in is ```$HOME/.kube/config```. If the Kubernetes config file is in a different location you need to change the appropriate command below accordingly.
+
+We use the Kubernetes config information from your home directory, assuming the Kubernetes config in is ```$HOME/.kube/config```. If the Kubernetes config file is in a different location you need to change the command *3. Create ConfigMap for kubectl configuration* in the next step (*Create ConfigMaps*) to point to your Kubernetes config file.
 
 #### 5. Create ConfigMaps
 
@@ -83,17 +84,17 @@ Use the following commands to create the required ConfigMaps:
 # Set the namespace (!!change if needed!!)
 K8S_SCR_MGR_NAMESPACE="default"
 
-# Create ConfigMap for k8s-scr-mgr configuration
+# 1. Create ConfigMap for k8s-scr-mgr configuration
 kubectl create configmap k8s-scr-mgr-config \
   --from-file=config=$HOME/k8s-scr-mgr/k8s-scr-mgr.config \
   --namespace=$K8S_SCR_MGR_NAMESPACE
 
-# Create ConfigMap for the SCR template
+# 2. Create ConfigMap for the SCR template
 kubectl create configmap scr-yaml-template \
   --from-file=template=$HOME/k8s-scr-mgr/scr-template.yaml \
   --namespace=$K8S_SCR_MGR_NAMESPACE
 
-# Create ConfigMap for kubectl configuration. 
+# 3. Create ConfigMap for kubectl configuration. 
 # Assuming the kubectl config file is in default location in the home directory
 kubectl create configmap kubectl-config \
   --from-file=config=$HOME/.kube/config \
