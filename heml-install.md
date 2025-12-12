@@ -14,7 +14,7 @@ Common parameter used for install:
 | set | dockerCredentials.registryId | The container registry user ID | Yes |
 | set | dockerCredentials.registryPassword | The container registry password | Yes |
 | set-file | kubeconfig | Fully qualified file name for the kubectl config file | Yes |
-| set | dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | NO |
+| set | dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
 
 To install the chart with the release name *k8s-scr-mrg* see example below:
 ```
