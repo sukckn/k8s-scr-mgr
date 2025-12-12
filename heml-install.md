@@ -16,6 +16,8 @@ Common parameter used for install:
 | set-file | kubeconfig | Fully qualified file name for the kubectl config file | Yes |
 | set | dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
 
+
+
 Example to install the chart with the release name *k8s-scr-mrg*:
 ```
 helm install k8s-scr-mgr ./k8sscrmgr \
@@ -30,6 +32,8 @@ helm install k8s-scr-mgr ./k8sscrmgr \
 --set-file kubeconfig=$HOME/.kube/config \
 --set dbCredentials.connectionstring="driver=sql;conopts=((driver=postgres;catalog=public;uid=mysas;pwd='asddsa';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
 ```
+
+
 
 Additional install parameters:
 | | Parameter | Comment | Required |
