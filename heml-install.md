@@ -17,8 +17,8 @@ Common parameter used for install:
 | set | dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
 
 
-
 Example to install the chart with the release name *k8s-scr-mrg*:
+
 ```
 helm install k8s-scr-mgr ./k8sscrmgr \
 --namespace k8sscrmgr \
@@ -33,9 +33,8 @@ helm install k8s-scr-mgr ./k8sscrmgr \
 --set dbCredentials.connectionstring="driver=sql;conopts=((driver=postgres;catalog=public;uid=mysas;pwd='asddsa';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
 ```
 
-
-
-Additional install parameters:
+<details>
+<summary>Additional install parameters</summary>
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
 | set | k8sScrMgr.base_url | Base endpoint of the *k8s-scr-mgr* container. If running multiple instances, assign a unique endpoint per instance <br>**Default:** /k8s-scr-mgr | No |
@@ -48,3 +47,4 @@ Additional install parameters:
 | set | k8sScrMgr.delete_scr | Enables the /delete-scr endpoint to delete pods and deployments.<br>**Default:** True | No |
 | set | k8sScrMgr.getlog_scr | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>**Default:** True | No |
 | set | k8sScrMgr.getlog_mas | Enables the /getlog-mas endpoint to receive the log for MAS.<br>**Default:** True | No |
+</details>
