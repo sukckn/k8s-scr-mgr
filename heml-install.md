@@ -35,7 +35,7 @@ Additional install parameters:
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
 | set | k8sScrMgr.base_url | Base endpoint of the *k8s-scr-mgr* container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /k8s-scr-mgr | No |
-| set | k8sScrMgr.port | Target port for the *k8s-scr-mgr* container. | | No |
+| set | k8sScrMgr.port | Target port for the *k8s-scr-mgr* container.<br>***Default:*** 8080 | No |
 | set | k8sScrMgr.container_prefix | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>***Default:*** no prefix | No |
 | set | k8sScrMgr.mas_pod | The prefix of the MAS POD. Default is *sas-microanalytic-score* | No |
 | set | k8sScrMgr.list_scr | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** True | No |
