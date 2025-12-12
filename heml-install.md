@@ -35,6 +35,7 @@ helm install k8s-scr-mgr ./k8sscrmgr \
 
 <details>
 <summary>Additional install parameters</summary>
+
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
 | set | k8sScrMgr.base_url | Base endpoint of the *k8s-scr-mgr* container. If running multiple instances, assign a unique endpoint per instance <br>**Default:** /k8s-scr-mgr | No |
