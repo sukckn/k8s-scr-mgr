@@ -7,7 +7,7 @@ Common parameter used for install:
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
 | | namespace | The namespace where *k8s-scr-mrg* is going to be installed.<br>**Default**: default | No |
-| set | installName | The name under which *k8s-scr-mrg* is going to be installed.<br>**Default**: Releasename-Chartname | No |
+| set | installName | The name under which *k8s-scr-mrg* is going to be installed.<br>**Default**: release name-chart name | No |
 | set | k8sScrMgr.viya_namespace | The namespace where Viya is installed.<br>**Default**: viya | No |
 | set | k8sScrMgr.host | The external URL where *k8s-scr-mrg* is going to be installed. | Yes |
 | set | dockerCredentials.baseRepoURL | The container registry location (URI) | Yes |
@@ -16,7 +16,7 @@ Common parameter used for install:
 | set-file | kubeconfig | Fully qualified file name for the kubectl config file | Yes |
 | set | dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
 
-To install the chart with the release name *k8s-scr-mrg* see example below:
+Example to install the chart with the release name *k8s-scr-mrg*:
 ```
 helm install k8s-scr-mgr ./k8sscrmgr \
 --namespace k8sscrmgr \
@@ -28,5 +28,5 @@ helm install k8s-scr-mgr ./k8sscrmgr \
 --set dockerCredentials.registryId=myregistry \
 --set dockerCredentials.registryPassword=NRoQbVCvdcBOcZZgURtIRKLq+ACRAbPpCz \
 --set-file kubeconfig=$HOME/.kube/config \
---set dbCredentials.connectionstring="driver=sql;conopts=((driver=postgres;catalog=public;uid=sas;pwd='lnxsas';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
+--set dbCredentials.connectionstring="driver=sql;conopts=((driver=postgres;catalog=public;uid=mysas;pwd='asddsa';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
 ```
