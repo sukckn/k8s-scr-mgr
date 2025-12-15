@@ -31,7 +31,7 @@ helm install k8s-scr-mgr ./k8sscrmgr \
 --set dockerCredentials.registryPassword=NRoQbVCvdcBOcZZgURtIRKLq+ACRAbPpCz \
 --set-file kubeconfig=$HOME/.kube/config \
 --set dbCredentials.connectionstring="driver=sql;conopts=((driver=postgres;catalog=public;uid=mysas;pwd='asddsa';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
-```
+``` 
 
 <details>
 <summary>Additional install parameters</summary>
