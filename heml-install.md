@@ -49,3 +49,5 @@ helm install k8s-scr-mgr ./k8sscrmgr \
 | set | k8sScrMgr.getlog_scr | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>**Default:** True | No |
 | set | k8sScrMgr.getlog_mas | Enables the /getlog-mas endpoint to receive the log for MAS.<br>**Default:** True | No |
 </details>
+
+**To uninstall see annotation *helm.sh/uninstall* in deployment**
