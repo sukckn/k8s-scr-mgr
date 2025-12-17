@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8sscrmgr.installName" .}} 
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app-owner: sas
+    app.kubernetes.io/name: {{ include "k8sscrmgr.installName" . }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | default .Chart.Version }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    helm.sh/release: {{ .Release.Name | quote }}
+  annotations:
+    helm.sh/uninstall: {{ include "k8sscrmgr.uninstall" . | quote }} 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app-owner: sas
+      app.kubernetes.io/name: {{ include "k8sscrmgr.installName" .}}
+  template:
+    metadata:
+      labels:
+        app-owner: sas
+        app.kubernetes.io/name: {{ include "k8sscrmgr.installName" .}}
+    spec:
+      containers:
+      - name: {{ include "k8sscrmgr.installName" .}}
+        image: ghcr.io/sukckn/k8s-scr-mgr:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 5000
+          protocol: TCP
+        volumeMounts:
+          - name: kubectl
+            mountPath: /tmp/config
+            subPath: config
+          - name: yaml-template
+            mountPath: /k8s-scr-mgr/template/scr-template.yaml
+            subPath: template
+          - name: k8s-scr-mgr-config
+            mountPath: /k8s-scr-mgr/app/config.py
+            subPath: config
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          runAsUser: 1001
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+      restartPolicy: Always
+      securityContext: {}
+      volumes:
+        - name: kubectl
+          configMap:
+            name: {{ .Release.Name }}-kubectl-config
+        - name: yaml-template
+          configMap:
+            name: {{ .Release.Name }}-scr-yaml-template
+        - name: k8s-scr-mgr-config
+          configMap:
+            name: {{ .Release.Name }}-configuration
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "k8sscrmgr.installName" .}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app-owner: sas
+    app.kubernetes.io/name: {{ include "k8sscrmgr.installName" .}}
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 5000
+  selector:
+    app-owner: sas
+    app.kubernetes.io/name: {{ include "k8sscrmgr.installName" .}}
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "k8sscrmgr.installName" .}}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app-owner: sas
+    app.kubernetes.io/name: {{ include "k8sscrmgr.installName" .}}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ required "Missing parameter 'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }} # set url for the server where you deploy k8s-scr-mgr
+    secretName: net-sas-com-app-certs
+  rules:
+  - host: {{ required "Missing parameter 'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }} # set url for the server where you deploy k8s-scr-mgr
+    http:
+      paths:
+      - path: /{{ .Release.Name }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "k8sscrmgr.installName" .}}
+            port:
+              number: 80

@@ -1,0 +1,35 @@
+# values.yaml
+fuffixName: ""
+installName: ""
+
+# Toggle namespace creation
+createNamespace: true
+
+# Namespaces for SCR
+namespace:
+  ns_scr: scr
+
+# k8s-scr-mgr parameters
+k8sScrMgr:
+  base_url: /k8s-scr-mgr
+  port: 8080
+  host:
+  viya_namespace: viya
+  container_prefix: scr
+  mas_pod: sas-microanalytic-score
+  list_scr: True
+  pull_scr: True
+  restart_scr: True
+  delete_scr: True
+  getlog_scr: True
+  getlog_mas: True 
+
+# Docker registry credentials
+dockerCredentials:
+  baseRepoURL:
+  registryId:
+  registryPassword:
+  
+# Database credentials for SCR Manager
+dbCredentials:
+  connectionstring:

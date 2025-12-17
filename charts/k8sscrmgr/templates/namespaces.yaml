@@ -1,0 +1,13 @@
+{{- if .Values.createNamespace }}
+{{- $namespace := (lookup "v1" "Namespace" "" .Values.namespace.ns_scr) }}
+{{- if not $namespace }}
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace.ns_scr }}
+  annotations:
+    "helm.sh/resource-policy": keep
+
+{{- end }}  
+{{- end }}  

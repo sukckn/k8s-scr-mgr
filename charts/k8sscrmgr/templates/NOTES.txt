@@ -1,0 +1,2 @@
+This chart has installed k8s-scr-mgr
+For the custom step UI use URL: {{ printf "%s.%s.svc.cluster.local" (include "k8sscrmgr.installName" . | trim) .Release.Namespace }}

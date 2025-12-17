@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-kubectl-config
+  namespace: {{ .Release.Namespace }}
+data:
+  config: |-
+{{- if .Values.kubeconfig }}
+{{ .Values.kubeconfig | nindent 4 }}
+{{- else }}
+{{ required "Missing parameter 'kubeconfig': --set-file kubeconfig=<kubeconfig file>" .Values.kubeconfig }}
+{{- end }}

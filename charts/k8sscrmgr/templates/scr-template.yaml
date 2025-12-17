@@ -1,0 +1,103 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-scr-yaml-template
+  namespace: {{ .Release.Namespace }}
+data:
+  template: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: <PREFIX><SCR-NAME>
+      namespace: <NAMESPACE>
+      labels:
+        app-owner: <APP-OWNER>
+        app.kubernetes.io/name: <PREFIX><SCR-NAME>
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app-owner: <APP-OWNER>
+          app.kubernetes.io/name: <PREFIX><SCR-NAME>
+      template:
+        metadata:
+          labels:
+            app-owner: <APP-OWNER>
+            app.kubernetes.io/name: <PREFIX><SCR-NAME>
+        spec:
+          containers:
+          - name: <PREFIX><SCR-NAME>
+            image: {{ .Values.dockerCredentials.baseRepoURL }}/<IMAGE-NAME>:<SCR-TAG>
+            imagePullPolicy: <IMAGE-PULL-POLICY>
+            ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            volumeMounts:
+    <DB-SECRET-MOUNT>
+            env:
+            - name: "Dummy-Env"
+              value: "Info"
+    <ENV-VARS>          
+            securityContext:
+              capabilities:
+                drop:
+                - ALL
+              privileged: false
+              runAsUser: 1001
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+          restartPolicy: Always
+          securityContext: {}
+          imagePullSecrets:
+          - name: {{ .Release.Name }}-docker-pull-secret
+          volumes:
+    <DB-SECRET-VOLUME>
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: <PREFIX><SCR-NAME>
+      namespace: <NAMESPACE>
+      labels:
+        app-owner: <APP-OWNER>
+        app.kubernetes.io/name: <PREFIX><SCR-NAME>
+    spec:
+      ports:
+      - name: http
+        protocol: TCP
+        port: 80
+        targetPort: <PORT>
+      selector:
+        app-owner: <APP-OWNER>
+        app.kubernetes.io/name: <PREFIX><SCR-NAME>
+      type: ClusterIP
+    ---
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: <PREFIX><SCR-NAME>
+      namespace: <NAMESPACE>
+      labels:
+        app-owner: <APP-OWNER>
+        app.kubernetes.io/name: <PREFIX><SCR-NAME>
+      annotations:
+        nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    spec:
+      ingressClassName: nginx
+      tls:
+      - hosts:
+        - <HOST>
+        secretName: net-sas-com-app-certs
+      rules:
+      - host: <HOST>
+        http:
+          paths:
+          - path: /<SCR-NAME>
+            pathType: Prefix
+            backend:
+              service:
+                name: <PREFIX><SCR-NAME>
+                port:
+                  number: 80

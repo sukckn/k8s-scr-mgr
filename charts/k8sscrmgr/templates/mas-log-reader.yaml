@@ -1,0 +1,70 @@
+# mas-log-reader.yaml
+# This file defines the Role, RoleBinding, ClusterRole, and ClusterRoleBinding
+{{- $existing := lookup "rbac.authorization.k8s.io/v1" "Role" ( .Values.k8sScrMgr.viya_namespace ) "mas-log-reader" -}}
+{{- if not $existing }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mas-log-reader
+  namespace: {{ .Values.k8sScrMgr.viya_namespace }} # namespace where SAS Viya is running
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get","list","watch"]
+- apiGroups: [""]
+  resources: ["pods/log"]
+  verbs: ["get","list", "watch"]
+{{- else }}
+# Role mas-log-reader already exists; skipping creation.
+{{- end }}
+
+---
+
+{{- $existing := lookup "rbac.authorization.k8s.io/v1" "Role" ( .Values.k8sScrMgr.viya_namespace ) "mas-log-reader-binding" -}}
+{{- if not $existing }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mas-log-reader-binding
+  namespace: {{ .Values.k8sScrMgr.viya_namespace }} # namespace where SAS Viya is running
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: {{ .Release.Namespace }} # namespace where k8s-scr-adm is running
+roleRef:
+  kind: Role
+  name: mas-log-reader
+  apiGroup: rbac.authorization.k8s.io
+{{- else }}
+# RoleBinding mas-log-reader-binding already exists; skipping creation.
+{{- end }}
+
+---
+
+# Create ClusterRole and ClusterRoleBinding only if they do not already exist
+{{- $existing := lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "mas-log-reader-cluster" -}}
+{{- if not $existing }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: mas-log-reader-cluster
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list", "watch"]
+{{- else }}
+# ClusterRole mas-log-reader-cluster already exists; skipping creation. 
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-binding-{{ .Release.Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: {{ .Release.Namespace }} # namespace where k8s-scr-adm is running
+roleRef:
+  kind: ClusterRole
+  name: mas-log-reader-cluster
+  apiGroup: rbac.authorization.k8s.io

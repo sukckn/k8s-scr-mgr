@@ -1,0 +1,29 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-role
+  namespace: {{ .Release.Namespace }} # namespace where k8s-scr-mgr pod is running
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["pods", "services", "pods/log"]
+  verbs: ["get", "list", "watch", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-binding
+  namespace: {{ .Values.namespace.ns_scr }} # namespace where SCRs are deployed
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: {{ .Release.Namespace }} # namespace where k8s-scr-mgr pod is running
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-role
+  apiGroup: rbac.authorization.k8s.io

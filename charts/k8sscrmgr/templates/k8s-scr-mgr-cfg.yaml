@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configuration
+  namespace: {{ .Release.Namespace }}
+data:
+  config: |
+    class Config:
+        BASE_URL= '{{ .Values.k8sScrMgr.base_url }}'
+        PORT= '{{ .Values.k8sScrMgr.port }}'
+        HOST= '{{ required "Missing parameter 'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }}'
+        NAMESPACE= '{{ .Values.namespace.ns_scr }}'
+        CONTAINER_PREFIX= '{{ .Values.k8sScrMgr.container_prefix }}'
+        VIYA_NAMESPACE= '{{ .Values.k8sScrMgr.viya_namespace }}'
+        MAS_POD= '{{ .Values.k8sScrMgr.mas_pod }}'
+        LIST_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.list_scr }}
+        PULL_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.pull_scr }}
+        RESTART_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.restart_scr }}
+        DELETE_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.delete_scr }}
+        GETLOG_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.getlog_scr }}
+        GETLOG_MAS= {{ ternary "True" "False" .Values.k8sScrMgr.getlog_mas }}
