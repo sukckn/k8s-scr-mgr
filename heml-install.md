@@ -2,12 +2,13 @@
 Install k8s-scr-mgr using helm chart.
 
 ### Installing the Chart
-Common parameter used for install:
+To install the chart you need to set some required parameters - see below. <br>
+here a list of common parameters used to install the chart:
 
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
 | | namespace | The namespace where *k8s-scr-mrg* is going to be installed.<br>**Default**: default | No |
-| set | installName | The name under which *k8s-scr-mrg* is going to be installed.<br>**Default**: release name-chart name | No |
+| set | installName | The name under which *k8s-scr-mrg* is going to be installed.<br>**Default**: \<release name\>-\<chart name\> | No |
 | set | k8sScrMgr.viya_namespace | The namespace where Viya is installed.<br>**Default**: viya | No |
 | set | k8sScrMgr.host | The external URL where *k8s-scr-mrg* is going to be installed. | Yes |
 | set | dockerCredentials.baseRepoURL | The container registry location (URI) | Yes |
@@ -20,7 +21,7 @@ Common parameter used for install:
 Example to install the chart with the release name *k8s-scr-mrg*:
 
 ```
-helm install k8s-scr-mgr ./k8sscrmgr \
+helm install k8s-scr-mgr helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 --namespace k8sscrmgr \
 --create-namespace \
 --set installName=k8s-scr-mgr \
