@@ -70,7 +70,11 @@ helm install k8s-scr-mgr helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr
 | set | k8sScrMgr.getlog_mas | Enables the /getlog-mas endpoint to receive the log for MAS.<br>**Default:** True | No |
 </details>
 
-> :bulb: **Tip**: See annotation *helm.sh/uninstall* in deployment for helm uninstall command.
+> :bulb: **Tip**: See annotation *helm.sh/uninstall* in Kubernetes deployment for helm uninstall command.
+
+
+---
+
 
 ### Manual Installation Guide
 See [instructions](manual-install.md) for manual install.
