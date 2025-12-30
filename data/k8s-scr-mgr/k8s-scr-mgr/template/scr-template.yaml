@@ -1,34 +1,44 @@
+#################################################################################################
+# The template is using token which get resolved when the template is called by k8s-scr-mgr:
+# <PREFIX>:            A prefix when the SCR container is loaded into Kubernetes. If prefix is used the artefacts in K8S will be the container image name plus a prefix.
+# <IMAGE-NAME>:        Name of the SCR image in the container registry to be loaded
+# <SCR-NAME>:          SCR name is the same as the Image-Name, but using hyphen (-) where Image-Name is using an underscore (_)
+# <NAMESPACE>:         The namespace where the containetr is loaded
+# <APP-OWNER>:         Contact person responsable for the SCR container
+# <SCR-TAG>:           Container tag
+# <IMAGE-PULL-POLICY>: Image pull policy
+# <HOST>:              URL where Kubernetes is running
+#################################################################################################
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scr-<SCR-NAME>
+  name: <PREFIX><SCR-NAME>
   namespace: <NAMESPACE>
   labels:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
 spec:
   replicas: 1
   selector:
     matchLabels:
       app-owner: <APP-OWNER>
-      app.kubernetes.io/name: scr-<SCR-NAME>
+      app.kubernetes.io/name: <PREFIX><SCR-NAME>
   template:
     metadata:
       labels:
         app-owner: <APP-OWNER>
-        app.kubernetes.io/name: scr-<SCR-NAME>
+        app.kubernetes.io/name: <PREFIX><SCR-NAME>
     spec:
       containers:
-      - name: scr-<SCR-NAME>
-        image: decisioning.azurecr.io/<SCR-NAME>:<SCR-TAG>
+      - name: <PREFIX><SCR-NAME>
+        image: <CONTAINER-REGISTRY>/<IMAGE-NAME>:<SCR-TAG>
         imagePullPolicy: <IMAGE-PULL-POLICY>
         ports:
         - name: http
           containerPort: 8080
           protocol: TCP
         volumeMounts:
-        - name: scr-db-secrets
-          mountPath: /opt/scr/secrets/db
+<DB-SECRET-MOUNT>
         env:
         - name: "Dummy-Env"
           value: "Info"
@@ -44,42 +54,37 @@ spec:
       restartPolicy: Always
       securityContext: {}
       imagePullSecrets:
-      - name: scr-agent-registry-pull-secret
+      - name: scr-docker-pull-secret
       volumes:
-      - name: scr-db-secrets
-        secret:
-          secretName: scr-agent-db.secrets
-          items:
-          - key: db.secrets
-            path: db.secrets
+<DB-SECRET-VOLUME>
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: scr-<SCR-NAME>
+  name: <PREFIX><SCR-NAME>
   namespace: <NAMESPACE>
   labels:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
 spec:
   ports:
   - name: http
     protocol: TCP
     port: 80
-    targetPort: <PORT>
+    targetPort: http
   selector:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
   type: ClusterIP
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: scr-<SCR-NAME>
+  name: <PREFIX><SCR-NAME>
   namespace: <NAMESPACE>
   labels:
     app-owner: <APP-OWNER>
-    app.kubernetes.io/name: scr-<SCR-NAME>
+    app.kubernetes.io/name: <PREFIX><SCR-NAME>
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
@@ -96,6 +101,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: scr-<SCR-NAME>
+            name: <PREFIX><SCR-NAME>
             port:
               number: 80

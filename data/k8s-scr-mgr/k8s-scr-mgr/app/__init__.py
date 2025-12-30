@@ -8,7 +8,7 @@ def create_app():
 
     app.config.from_object('app.config.Config')  # Load config
 
-    base_url= app.config.get('BASE_URL', '/')  # Default to / if not set
+    base_url= app.config.get('BASE_URL', '/k8s-scr-mgr')  # Default to / if not set
     pull_scr_bp= create_blueprint(base_url, k8s_scr_mgr_version)
 
     # Register blueprints

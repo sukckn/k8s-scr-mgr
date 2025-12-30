@@ -54,11 +54,26 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >db_secret< is required'}), status
 
+        # get container registry from input or config
+        container_registry= inputData.get('container_registry')
+        if container_registry == None:
+            container_registry= current_app.config.get('CONTAINER_REGISTRY', '')
+            if len(container_registry) == 0:
+                status= 400
+                return jsonify({'error': 'Error: Parameter >container_registry< is required'}), status
+
+        # get namespace from input or config
+        namespace= inputData.get('namespace')
+        if namespace == None:
+            namespace= current_app.config.get('NAMESPACE', '')
+            if len(namespace) == 0:
+                status= 400
+                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
+
         # get parameters from config or use default
-        namespace= current_app.config.get('NAMESPACE', 'default')
         host= current_app.config.get('HOST', '127.0.0.1')
-        port= current_app.config.get('PORT', '8080')
         cont_prefix= current_app.config.get('CONTAINER_PREFIX', '')
+
         # if a prefix for the SCR container is to be set we add an dash (-) to it
         if len(cont_prefix) > 0:
             cont_prefix= cont_prefix + '-'
@@ -82,14 +97,14 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         with open('./template/scr-template.yaml', 'r') as file:
             yaml_template= file.read()
 
-        yaml_content= yaml_template.replace('<IMAGE-NAME>', IMAGE_NAME)
+        yaml_content= yaml_template.replace('<CONTAINER-REGISTRY>', container_registry)
+        yaml_content= yaml_content.replace('<IMAGE-NAME>', IMAGE_NAME)
         yaml_content= yaml_content.replace('<SCR-NAME>', SCR_NAME)
         yaml_content= yaml_content.replace('<APP-OWNER>', APP_OWNER)
         yaml_content= yaml_content.replace('<SCR-TAG>', SCR_TAG)
         yaml_content= yaml_content.replace('<IMAGE-PULL-POLICY>', IMAGE_PULL_POLICY)
         yaml_content= yaml_content.replace('<NAMESPACE>', namespace)
         yaml_content= yaml_content.replace('<HOST>', host)
-        yaml_content= yaml_content.replace('<PORT>', port)
         yaml_content= yaml_content.replace('<PREFIX>', cont_prefix)
         yaml_content= yaml_content.replace('<ENV-VARS>', env)
         yaml_content= yaml_content.replace('<DB-SECRET-MOUNT>', db_secret_mount)
@@ -141,10 +156,16 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >deployment_name< is required'}), status
 
+        # get namespace from input or config
+        namespace= inputData.get('namespace')
+        if namespace == None:
+            namespace= current_app.config.get('NAMESPACE', '')
+            if len(namespace) == 0:
+                status= 400
+                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
+
         # get parameters from config or use default
-        namespace= current_app.config.get('NAMESPACE', 'default')
         host= current_app.config.get('HOST', '127.0.0.1')
-        port= current_app.config.get('PORT', '8080')
 
         try:
             result= subprocess.run(['kubectl', 'rollout', 'restart', 'deployment', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
@@ -174,7 +195,13 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         if not endpoint_available:
             return jsonify({'error': 'Endpoint "/list-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
-        namespace= current_app.config.get('NAMESPACE', 'default')
+        # get namespace from input or config
+        namespace= inputData.get('namespace')
+        if namespace == None:
+            namespace= current_app.config.get('NAMESPACE', '')
+            if len(namespace) == 0:
+                status= 400
+                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
 
         # Run kubectl to get pods 
         command= ["kubectl", "get", "pods", "-n", namespace, "-o", "json"]
@@ -250,10 +277,13 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >deployment_name< is required'}), status
 
-        # get parameters from config or use default
-        namespace= current_app.config.get('NAMESPACE', 'default')
-        host= current_app.config.get('HOST', '127.0.0.1')
-        port= current_app.config.get('PORT', '8080')
+        # get namespace from input or config
+        namespace= inputData.get('namespace')
+        if namespace == None:
+            namespace= current_app.config.get('NAMESPACE', '')
+            if len(namespace) == 0:
+                status= 400
+                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
 
         # Delete the deployment
         try:
@@ -344,8 +374,13 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >num_rows< must be greater than or equal to 0'}), status
         
-        # get parameters from config or use default
-        namespace= current_app.config.get('NAMESPACE', 'default')
+        # get namespace from input or config
+        namespace= inputData.get('namespace')
+        if namespace == None:
+            namespace= current_app.config.get('NAMESPACE', '')
+            if len(namespace) == 0:
+                status= 400
+                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
 
         # Define the command to get podname
         command= f"kubectl get pods --namespace {namespace} | grep {POD_NAME}"

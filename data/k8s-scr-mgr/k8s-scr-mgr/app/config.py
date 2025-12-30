@@ -1,5 +1,6 @@
 class Config:
-    BASE_URL= '/k8s-scr-scr'
+#    BASE_URL= '/k8s-scr-mgr'
+    CONTAINER_REGISTRY= 'decisioning.azurecr.io'
     PORT= '8080'
     HOST= 'my-server.sas.com'
     NAMESPACE= 'scr'
