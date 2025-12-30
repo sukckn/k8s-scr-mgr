@@ -84,3 +84,145 @@ You can load the template file using helm parameter *k8sScrMgr.scr_yaml_template
 ### Manual Installation Guide
 See [instructions](manual-install.md) for manual install.
 
+---
+
+## ID - K8S SCR Manager
+The **ID - K8S SCR Manager** custom step allows you to interact with the k8s-scr-mgr service from within SAS Viya using SAS Studio. This step supports operations such as:<br>
+
+🔷 **Load** SCR images into Kubernetes<br>
+🔷 **Restart** launched SCR containers<br>
+🔷 **Delete** SCR container deployments<br>
+🔷 **List** all pods running in the dedicated Kubernetes namespace<br>
+🔷 **Show** log for SCR container<br>
+🔷 **Show MAS** log for information<br>
+
+---
+
+### Importing the Custom Step
+To import custom step *ID - K8S SCR Manager*:
+* Open SAS Studio.
+* In your home folder (My Folder), create a sub-folder named ```custom steps```.
+* Upload file [ID - K8S SCR Manager.step](./data/custom_step/ID%20-%20K8S%20SCR%20Manager.step) into the *custom steps* folder.
+
+---
+
+### User Interface
+#### Modus
+Use this section to choose the operation you want to perform:
+
+* **Pull Image**<br>
+    Load a new SCR image from the Docker registry into Kubernetes.
+* **Restart** pod<br>
+    Restart a pod, typically after publishing a new version of an SCR image.
+* **Delete deployment**<br>
+    Remove an SCR deployment from Kubernetes.
+* **Get list of pods in namespace**<br>
+    Retrieve a list of pods in the *scr-pull* namespace, including status and age information.
+* **Get log**<br>
+    Retrive the log for a container in the dedicated namespace.
+
+![](./images/pull-image.jpg)
+
+#### Pull image
+* **Container Image Name**<br>
+The name of the SCR container image in the Docker registry
+* **Container Image Tag**<br>
+The tag name of the image you want to load. E.g.: latest or 6
+* **Owner**<br>
+Set a Kubernetes lable for the owner of the scr image. Information who to contact by question about the image
+* **Image Pull Policy**,br
+Set how the image should get pulled if the pod gets restarted.<br>
+Options:
+    * Always (default)<br>
+    The Kubelet will always attempt to pull the image from the registry every time a container is launched
+    * IfNotPresent<br>
+    The Kubelet will only pull the image if it is not already present on the node. If a local copy exists, it will be used without checking the registry for updates
+    * Never<br>
+    It will only use a locally available image. If the image is not found locally, the container launch will fail. This policy is typically used for development or air-gapped environments where images are pre-loaded onto nodes
+* **SCR is using database**
+    * Tick this box if the SCR image is accessing a database. If this box is ticked a database secret needs to be set. [See Create Database Secret](#2-create-database-secret).    
+* **Environment Variables**<br>
+Set the number of environment variables you want to set for the scr container
+* **Environment Variable**<br>
+    * **Name**<br>
+    Name of the environment variable
+    * **Value**<br>
+    Environment variable value
+
+>❗**Note:** The deployment and pod created in Kubernetes are prefixed with **scr-** followed by the image name.<br>
+**Example:** For an image named *my-id-flow*, the deployment and pod will be named *scr-my-id-flow*.
+
+---
+#### Restart pod
+![](./images/restart-pod.jpg)
+
+* **Deployment name**<br>
+Set the name of the scr deployment you want to re-start.
+
+---
+
+#### Delete deployment
+![](./images/delete-deployment.jpg)
+
+* **Deployment name**<br>
+Set the name of the scr deployment you want to delete.
+---
+
+#### Get list of pods in namespace
+![](./images/list-pods.jpg)
+
+Run the step to receive a list of all pods running in the namespace linked to k8s-scr-mgr.
+
+---
+
+#### Get log
+![](./images/get-log.jpg)
+
+* **Pod name**<br>
+The name of the pod for wich you want the log information.<br>
+You don't need to type in the complete pod name, partions of it will work. E.g.: if the pod name is 'scr-mypod-7b7c55d84b-2fm87' you can just tyep 'mypod'.
+
+* **Show rows in log**
+This indecates how many rows from the log will be shown.
+    * All rows<br>
+    Shows the complete log
+    * Top rows<br>
+    Show the top number of rows as set in field **Number of rows**
+    * Bottom rows<br>
+    Show last number of rows as set in field **Number of rows**
+
+#### Get MAS log
+![](./images/get-MAS-log.jpg)
+
+* **Show rows in log**
+This indecates how many rows from the log will be shown.
+    * All rows<br>
+    Shows the complete log
+    * Top rows<br>
+    Show the top number of rows as set in field **Number of rows**
+    * Bottom rows<br>
+    Show last number of rows as set in field **Number of rows**
+
+    > By default it will show the last 30 rows in the log.
+
+<br>
+
+---
+
+### Options
+![](./images/options.jpg)
+
+Configure the URL for the *k8s-scr-mgr* service. The default is:
+```
+k8s-scr-mgr.default.svc.cluster.local
+```
+If *k8s-scr-mgr* is not deployed to namespace ```default```, update the URL using the format:
+```
+<pod-name>.<namespace>.svc.cluster.local
+```
+Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
+```
+%let k8s_scr_mgr_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
+
+```
+
