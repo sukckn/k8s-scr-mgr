@@ -1,10 +1,10 @@
 #################################################################################################
 # The template is using token which get resolved when the template is called by k8s-scr-mgr:
-# <PREFIX>:            The prefix when the SCR container is loaded into Kubernetes
-# <SCR-NAME>:          The SCR name loaed into Kubernetes
+# <PREFIX>:            A prefix when the SCR container is loaded into Kubernetes. If prefix is used the artefacts in K8S will be the container image name plus a prefix.
+# <IMAGE-NAME>:        Name of the SCR image in the container registry to be loaded
+# <SCR-NAME>:          SCR name is the same as the Image-Name, but using hyphen (-) where Image-Name is using an underscore (_)
 # <NAMESPACE>:         The namespace where the containetr is loaded
 # <APP-OWNER>:         Contact person responsable for the SCR container
-# <IMAGE-NAME>:        Name of the SCR image in the container registry
 # <SCR-TAG>:           Container tag
 # <IMAGE-PULL-POLICY>: Image pull policy
 # <HOST>:              URL where Kubernetes is running
