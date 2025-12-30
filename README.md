@@ -54,7 +54,7 @@ helm install k8s-scr-mgr helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr
 ``` 
 
 <details>
-<summary>Additional install parameters</summary>
+<summary>#### Additional install parameters</summary>
 
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
@@ -76,7 +76,7 @@ helm install k8s-scr-mgr helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr
 #### Yaml file to load SCR Container
 By default a yaml file template is used to load the SCR container into Kubernetes. You can overwrite the default template to adjust Kubernetes settings when loading a SCR container.
 Download the [template file](./data/config/scr-template.yaml) and edit the file as appropriate.
-You can load the template file using helm parameter *k8sScrMgr.scr_yaml_template*
+You can load the template file using helm parameter *k8sScrMgr.scr_yaml_template* [sss]
 
 ---
 
