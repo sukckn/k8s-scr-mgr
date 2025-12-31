@@ -28,7 +28,6 @@ cd k8s-scr-mgr
 Download file [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) and edit it to set the required parameters for your *k8s-scr-mgr* instance:
 | *Name* | *Comment* |
 | ---    | ---       |
-| BASE_URL | Base endpoint of the *k8s-scr-mgr* container. If running multiple instances, assign a unique endpoint per instance <br>***Default:*** /k8s-scr-mgr |
 | HOST | External host address (typically the hostname) where *k8s-scr-mgr* is accessible. (E.g., myserver.sas.com) |
 | NAMESPACE | Kubernetes namespace dedicated to *k8s-scr-mgr*<br>**Default:** scr |
 | CONTAINER_PREFIX | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>***Default:*** no prefix
