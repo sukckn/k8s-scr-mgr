@@ -17,7 +17,7 @@ Once deployed, the `k8s-scr-mgr` container provides a service accessible via cus
 
 ---
 
-## Installation Guide xxxxx
+## Installation Guide
 Install k8s-scr-mgr using helm chart or you can install it manually.
 
 ### Installing via Helm Chart
