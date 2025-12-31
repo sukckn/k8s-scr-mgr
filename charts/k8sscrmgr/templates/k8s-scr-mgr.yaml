@@ -82,6 +82,9 @@ spec:
     app.kubernetes.io/name: {{ include "k8sscrmgr.installName" .}}
   type: ClusterIP
 ---
+{{- $name := include "k8sscrmgr.installName" . -}}
+{{- $existing := lookup "networking.k8s.io/v1" "Ingress" .Release.Namespace $name -}}
+{{- if not $existing }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -109,3 +112,4 @@ spec:
             name: {{ include "k8sscrmgr.installName" .}}
             port:
               number: 80
+{{- end }}

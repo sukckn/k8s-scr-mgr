@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   config: |-
-{{- if .Values.kubeconfig }}
-{{ .Values.kubeconfig | nindent 4 }}
+{{- if .Values.k8sScrMgr.kubeconfig }}
+{{ .Values.k8sScrMgr.kubeconfig | nindent 4 }}
 {{- else }}
-{{ required "Missing parameter 'kubeconfig': --set-file kubeconfig=<kubeconfig file>" .Values.kubeconfig }}
+{{ required "Missing parameter 'k8sScrMgr.kubeconfig': --set-file k8sScrMgr.kubeconfig=<kubeconfig file>" .Values.k8sScrMgr.kubeconfig }}
 {{- end }}

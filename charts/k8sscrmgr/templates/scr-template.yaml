@@ -5,6 +5,7 @@ metadata:
   name: {{ .Release.Name }}-scr-yaml-template
   namespace: {{ .Release.Namespace }}
 data:
+{{- if (empty .Values.k8sScrMgr.scr_yaml_template) }}
   template: |
     apiVersion: apps/v1
     kind: Deployment
@@ -28,7 +29,7 @@ data:
         spec:
           containers:
           - name: <PREFIX><SCR-NAME>
-            image: {{ .Values.dockerCredentials.baseRepoURL }}/<IMAGE-NAME>:<SCR-TAG>
+            image: <CONTAINER-REGISTRY>/<IMAGE-NAME>:<SCR-TAG>
             imagePullPolicy: <IMAGE-PULL-POLICY>
             ports:
             - name: http
@@ -68,7 +69,7 @@ data:
       - name: http
         protocol: TCP
         port: 80
-        targetPort: <PORT>
+        targetPort: http
       selector:
         app-owner: <APP-OWNER>
         app.kubernetes.io/name: <PREFIX><SCR-NAME>
@@ -101,3 +102,7 @@ data:
                 name: <PREFIX><SCR-NAME>
                 port:
                   number: 80
+{{- else }}
+  template: |
+{{ .Values.k8sScrMgr.scr_yaml_template | indent 4 }}
+{{- end }}                  

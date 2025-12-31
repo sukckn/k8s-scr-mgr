@@ -1,4 +1,2 @@
 # Ignore virtual environment folder
 venv/
-
-*.md
