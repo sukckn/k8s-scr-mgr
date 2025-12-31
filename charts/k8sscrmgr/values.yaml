@@ -2,9 +2,6 @@
 fuffixName: ""
 installName: ""
 
-# Toggle namespace creation
-createNamespace: true
-
 # Namespaces for SCR
 namespace:
   ns_scr: scr
@@ -34,3 +31,19 @@ dockerCredentials:
 # Database credentials for SCR Manager
 dbCredentials:
   connectionstring:
+
+# List of scr parameters used when creating more than one SCR namespace
+scr:
+  - namespace: scr
+    dbCredentials: "driver=sql;conopts=((driver=postgres;catalog=public;uid=sas;pwd=lnxsas;server=pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
+    dockerCredentials:
+      baseRepoURL: "www"
+      registryId: "ooo"
+      registryPassword: "pwd"
+
+  - namespace: scr2
+    dbCredentials: "driver=sql;conopts=((driver=postgres;catalog=public;uid=sas;pwd=lnxsas;server=pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
+    dockerCredentials:
+      baseRepoURL: "www"
+      registryId: "ooo"
+      registryPassword: "pwd"

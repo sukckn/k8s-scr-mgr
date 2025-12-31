@@ -1,13 +1,17 @@
-{{- if .Values.createNamespace }}
-{{- $namespace := (lookup "v1" "Namespace" "" .Values.namespace.ns_scr) }}
-{{- if not $namespace }}
+{{- range $i, $item := .Values.scr }}
+  {{/* Create Namespace if not exists */}}
+  {{- $name := $item.namespace | lower | replace " " "-" | trunc 63 -}}
+  {{- $existing := (lookup "v1" "Namespace" "" $name) -}}
+  {{- if not $existing }}
 
+---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: {{ .Values.namespace.ns_scr }}
+  name: {{ $name }}
   annotations:
     "helm.sh/resource-policy": keep
 
+  {{- end }}  
 {{- end }}  
-{{- end }}  
+
