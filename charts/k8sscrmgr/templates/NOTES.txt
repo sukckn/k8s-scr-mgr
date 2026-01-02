@@ -1,12 +1,2 @@
 This chart has installed k8s-scr-mgr
 For the custom step UI use URL: {{ printf "%s.%s.svc.cluster.local" (include "k8sscrmgr.installName" . | trim) .Release.Namespace }}
-*******
-{{- range $i, $item := .Values.scr }}
-  {{- if $item.dbCredentials }}
-    {{- $namespace := ($item.namespace | default "") | lower | replace " " "-" | trunc 63 }}
-    {{- $connectionstring := $item.dbCredentials }}
-
-{{ printf "connectionstring=%s" $connectionstring | quote }}
- 
-    {{- end }}
-  {{- end }}

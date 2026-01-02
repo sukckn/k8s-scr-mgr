@@ -3,15 +3,13 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-configuration
   namespace: {{ .Release.Namespace }}
-#        BASE_URL= '{{ .Values.k8sScrMgr.base_url }}'
 data:
   config: |
     class Config:
-        PORT= ''
         HOST= '{{ required "Missing parameter 'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }}'
-        NAMESPACE= '{{ .Values.namespace.ns_scr }}'
+        NAMESPACE= '{{ (index .Values.scr 0).namespace }}'
         CONTAINER_PREFIX= '{{ .Values.k8sScrMgr.container_prefix }}'
-        CONTAINER_REGISTRY= '{{ .Values.dockerCredentials.baseRepoURL }}'
+        CONTAINER_REGISTRY= '{{ required "Missing parameter 'scr[0].dockerCredentials.baseRepoURL': --set scr[0].dockerCredentials.baseRepoURL=<container registry location (URI)>" (index .Values.scr 0).dockerCredentials.baseRepoURL }}'
         VIYA_NAMESPACE= '{{ .Values.k8sScrMgr.viya_namespace }}'
         MAS_POD= '{{ .Values.k8sScrMgr.mas_pod }}'
         LIST_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.list_scr }}
