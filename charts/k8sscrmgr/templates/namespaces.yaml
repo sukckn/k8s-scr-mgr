@@ -22,5 +22,5 @@ metadata:
   annotations:
     "helm.sh/resource-policy": keep
 
-  {{- end }}  
+  {{- end -}}  
 {{- end }}  
