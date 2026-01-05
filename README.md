@@ -27,7 +27,6 @@ Here a list of common parameters when installing the chart:
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
 | | namespace | The namespace where *k8s-scr-mrg* is going to be installed.<br>**Default**: default | No |
-| set | installName | The name under which *k8s-scr-mrg* is going to be installed.<br>**Default**: \<release name\>-\<chart name\> | No |
 | set | k8sScrMgr.viya_namespace | The namespace where Viya is installed.<br>**Default**: viya | No |
 | set | k8sScrMgr.host | The external URL where *k8s-scr-mrg* is going to be installed. | Yes |
 | set-file | k8sScrMgr.kubeconfig | Fully qualified file name for the kubectl config file | Yes |
@@ -43,7 +42,6 @@ Example to install the chart with the release name *k8s-scr-mrg*:
 helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 --namespace k8sscrmgr \
 --create-namespace \
---set installName=k8s-scr-mgr \
 --set k8sScrMgr.viya_namespace=viya4 \
 --set k8sScrMgr.host=my-server.net.sas.com \
 --set-file k8sScrMgr.kubeconfig=$HOME/.kube/config \

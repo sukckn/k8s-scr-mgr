@@ -52,7 +52,7 @@ data:
           restartPolicy: Always
           securityContext: {}
           imagePullSecrets:
-          - name: {{ .Release.Name }}-docker-pull-secret
+          - name: scr-docker-pull-secret 
           volumes:
     <DB-SECRET-VOLUME>
     ---
