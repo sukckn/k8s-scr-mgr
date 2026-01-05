@@ -13,16 +13,16 @@ Once deployed, the `k8s-scr-mgr` container provides a service accessible via cus
 🔷 **Show** log for SCR container<br>
 🔷 **Show MAS** log for information<br>
 
-> ⚠️ For security reasons, all SCR containers are loaded into a **dedicated namespace**. The default namespace is *scr*. You can overwrite the default namespace using parameter *
+> ⚠️ For security reasons, all SCR containers are loaded into **dedicated namespaces**. The default namespace is *scr*. You can overwrite the default namespace when installing *k8s-scr-mgr*.
 
 ---
 
 ## Installation Guide
-Install k8s-scr-mgr using helm chart or you can install it manually.
+You can install k8s-scr-mgr using helm chart or you can install it manually.
 
 ### Installing via Helm Chart
 To install the chart you need to set some required parameters - see below. <br>
-here a list of common parameters used to install the chart:
+Here a list of common parameters when installing the chart:
 
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
@@ -31,26 +31,27 @@ here a list of common parameters used to install the chart:
 | set | k8sScrMgr.viya_namespace | The namespace where Viya is installed.<br>**Default**: viya | No |
 | set | k8sScrMgr.host | The external URL where *k8s-scr-mrg* is going to be installed. | Yes |
 | set-file | k8sScrMgr.kubeconfig | Fully qualified file name for the kubectl config file | Yes |
-| set | dockerCredentials.baseRepoURL | The container registry location (URI) | Yes |
-| set | dockerCredentials.registryId | The container registry user ID | Yes |
-| set | dockerCredentials.registryPassword | The container registry password | Yes |
-| set | dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
+| set | scr[0].dockerCredentials.baseRepoURL | The container registry location (URI) | Yes |
+| set | scr[0].dockerCredentials.registryId | The container registry user ID | Yes |
+| set-string | scr[0].dockerCredentials.registryPassword | The container registry password | Yes |
+| set-string | scr[0].dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
+| set | scr[0].namespace | Namespace where to load the SCR container.<br>**Default** scr (only for namespace[0]) | No |
 
 
 Example to install the chart with the release name *k8s-scr-mrg*:
 
 ```
-helm install k8s-scr-mgr helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
+helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 --namespace k8sscrmgr \
 --create-namespace \
 --set installName=k8s-scr-mgr \
 --set k8sScrMgr.viya_namespace=viya4 \
 --set k8sScrMgr.host=my-server.net.sas.com \
 --set-file k8sScrMgr.kubeconfig=$HOME/.kube/config \
---set dockerCredentials.baseRepoURL=myregistry.azurecr.io \
---set dockerCredentials.registryId=myregistry \
---set dockerCredentials.registryPassword=NRoQbVCvdcBOcZZgURtIRKLq+ACRAbPpCz \
---set dbCredentials.connectionstring="driver=sql;conopts=((driver=postgres;catalog=public;uid=mysas;pwd='asddsa';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))"
+--set-string scr[0].dbCredentials="driver=sql;conopts=((driver=postgres;catalog=public;uid=mysas;pwd='asddsa';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))" \
+--set scr[0].dockerCredentials.baseRepoURL=myregistry.azurecr.io \
+--set scr[0].dockerCredentials.registryId=myregistry \
+--set-string scr[0].dockerCredentials.registryPassword=w3Z6bWrCr0NQMdL+NRoQbVCvdcBOcZZgURtIRKLq+ACRAbPp
 ``` 
 
 <details>
@@ -77,8 +78,19 @@ By default a yaml file template is used to load the SCR container into Kubernete
 Download the [template file](./data/config/scr-template.yaml) and edit the file as appropriate.
 You can load the template file using helm parameter *k8sScrMgr.scr_yaml_template*
 
----
+#### Configure for more than one Viya Publishing Destination
+If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a spcific publishing destination. Each container registry (publishing destinaton) will have its own dedicated namespace and database connection details. 
 
+For each container registry (publishing destinaton) you need to set:
+* namespace
+* dbCredentials
+* dockerCredentials.baseRepoURL
+* dockerCredentials.registryId
+* dockerCredentials.registryPassword
+
+The parameters are in section *scr* and will be called like *scr[x].namespace* where *x* is the number of the container registry you want to register. The first container registry starts with 0 and is compulsary.
+
+---
 
 ### Manual Installation Guide
 See [instructions](manual-install.md) for manual install.

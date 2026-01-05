@@ -2,8 +2,6 @@
 > ❗**Note**: By default *k8s-scr-mgr* will be installed into namespace ```default```. The default namespace to load the scr containers is ```scr```. Both namespaces can be changed if necessary.
 
 ### Create a Dedicated Namespace
-`k8s-scr-mgr` operates within a single Kubernetes namespace per instance. If you require multiple namespaces, you must deploy separate instances of `k8s-scr-mgr`.
-
 If you don't have a dedicated namespace yet, you need to create one. The default namespace to load the scr images is ```scr```. To create a namespace `scr`, run:
 
 ```
@@ -29,10 +27,10 @@ Download file [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) and edit it
 | *Name* | *Comment* |
 | ---    | ---       |
 | HOST | External host address (typically the hostname) where *k8s-scr-mgr* is accessible. (E.g., myserver.sas.com) |
-| NAMESPACE | Kubernetes namespace dedicated to *k8s-scr-mgr*<br>**Default:** scr |
+| NAMESPACE | Kubernetes namespace dedicated to load SCR containers.<br>**Default:** scr |
 | CONTAINER_PREFIX | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>***Default:*** no prefix
 | VIYA_NAMESPACE | The Kubernetes namespace where Viya is installed |
-| MAS_POD | The prefix of the MAS POD. Default is *sas-microanalytic-score* |
+| MAS_POD | The prefix of the MAS POD.<br>***Default:*** *sas-microanalytic-score* |
 | LIST_SCR | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>***Default:*** True |
 | PULL_SCR | Enables the /k8s-scr-mgr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>***Default:*** True |
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** True |
@@ -194,5 +192,21 @@ If the SCR image accesses a database, you must create a database secret. You can
     ```
     kubectl get pods --namespace default | grep k8s-scr-mgr
     ```
+
+---
+
+### More than one Viya Publishing Destination
+If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a spcific publishing destination. Each container registry (publishing destinaton) will have its own dedicated namespace and database connection details. 
+
+To register a second container registry (publishing destinaton) you need to repeat some of the above steps and adjust the templates for SCR load namespace:
+
+* Create another [namespace](#create-a-dedicated-namespace)
+* Create second [Image Pull Secret](#1-create-image-pull-secret)<br>
+Crrate a pull secret for the secon container registry. Ensure to change the default namespace *scr* to point to the appropriate namespace.
+* Create second [Database Secret](#2-create-database-secret)<br>
+Create a database secret for the namespace. Ensure to change the default namespace *scr* to point to the appropriate namespace.
+Set [Kubernetes Role Binding](#3-deploy-k8s-scr-mgr-to-kubernetes)<br>
+Set the role bindings for the new namespace. Adjust settings in [k8s-scr-mgr-role.yaml](./data/yaml/k8s-scr-mgr-role.yaml). Ensure to change the default namespace *scr* to point to the appropriate namespace.
+
 
 
