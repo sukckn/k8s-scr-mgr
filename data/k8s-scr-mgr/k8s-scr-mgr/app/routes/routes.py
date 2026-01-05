@@ -2,7 +2,43 @@ from flask import request, jsonify, Blueprint, current_app
 import json
 from datetime import datetime, timezone
 import subprocess
+import base64
 
+##########################################################################################
+# Function to get the container registry from the scr-docker-pull-secret
+##########################################################################################
+def get_dockerconfigjson(namespace):
+    msg= ''
+    try:
+        # Get the .dockerconfigjson field (still Base64-encoded)
+        result = subprocess.run(["kubectl", '--kubeconfig=/tmp/config', "get", "secret", "scr-docker-pull-secret", "-n", namespace, "-o", "jsonpath={.data.\\.dockerconfigjson}"], check=True, capture_output=True, text=True)
+        b64_value = result.stdout.strip()
+        if not b64_value:
+            msg= f"Empty .dockerconfigjson value received from scr-docker-pull-secret in namespace {namespace}."
+            return None, msg
+
+        # Decode Base64
+        decoded= base64.b64decode(b64_value)
+        try:
+            decoded= decoded.decode('utf-8')  # Convert bytes to string
+        except UnicodeDecodeError:
+            msg= f"Decoded .dockerconfigjson from scr-docker-pull-secret (namespace: {namespace}) is not valid UTF-8."
+            return None, msg
+        try:
+            dockerPull= json.loads(decoded)  # Validate JSON
+        except json.JSONDecodeError:
+            msg= f"Decoded .dockerconfigjson from scr-docker-pull-secret (namespace: {namespace}) is not valid JSON."
+            return None, msg
+
+        return list(dockerPull["auths"].keys())[0], msg
+    except subprocess.CalledProcessError as e:
+        msg= f"kubectl failed (exit {e.returncode}): {e.stderr}"
+        return None, msg
+    except Exception as e:
+        msg= f"Error: {e}"
+        return None, msg
+
+##########################################################################################
 def create_blueprint(base_url, k8s_scr_mgr_version):
     # Create a Blueprint for the k8s-scr-mgr routes
     bp= Blueprint('k8s-scr-mgr', __name__, url_prefix=base_url)
@@ -49,18 +85,11 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >image_pull_policy< is required'}), status
 
+        # indicator if db secret is to be mounted (true/false)
         SET_DB_SECRET= int(inputData.get('db_secret'))
         if SET_DB_SECRET == None:
             status= 400
             return jsonify({'error': 'Error: Parameter >db_secret< is required'}), status
-
-        # get container registry from input or config
-        container_registry= inputData.get('container_registry')
-        if container_registry == None:
-            container_registry= current_app.config.get('CONTAINER_REGISTRY', '')
-            if len(container_registry) == 0:
-                status= 400
-                return jsonify({'error': 'Error: Parameter >container_registry< is required'}), status
 
         # get namespace from input or config
         namespace= inputData.get('namespace')
@@ -69,6 +98,11 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             if len(namespace) == 0:
                 status= 400
                 return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
+
+        container_registry, msg = get_dockerconfigjson(namespace)
+        if not container_registry:
+            status= 400 
+            return jsonify({'error': f'Error: Problem retrieving container registry from scr-docker-pull-secret: {msg}'}), status
 
         # get parameters from config or use default
         host= current_app.config.get('HOST', '127.0.0.1')
