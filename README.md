@@ -1,7 +1,7 @@
 ![k8s-scr-mgr logo](./images/k8s-scr-mgr_rm.png)
 
 # `k8s-scr-mgr`: Service Container for SAS Viya SCR
-`k8s-scr-mgr` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry but developers may not have direct access to the Kubernetes cluster.
+`k8s-scr-mgr` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry, but developers may not have direct access to the Kubernetes cluster.
 
 ## Features
 Once deployed, the `k8s-scr-mgr` container provides a service accessible via custom step *ID - K8S SCR Manager* in SAS Studio to:
@@ -21,7 +21,7 @@ Once deployed, the `k8s-scr-mgr` container provides a service accessible via cus
 You can install k8s-scr-mgr using helm chart or you can install it manually.
 
 ### Installing via Helm Chart
-To install the chart you need to set some required parameters - see below. <br>
+To install the chart, you need to set some required parameters - see below. <br>
 Here a list of common parameters when installing the chart:
 
 | | Parameter | Comment | Required |
@@ -36,7 +36,6 @@ Here a list of common parameters when installing the chart:
 | set-string | scr[0].dockerCredentials.registryPassword | The container registry password | Yes |
 | set-string | scr[0].dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
 | set | scr[0].namespace | Namespace where to load the SCR container.<br>**Default** scr (only for namespace[0]) | No |
-
 
 Example to install the chart with the release name *k8s-scr-mrg*:
 
@@ -59,7 +58,7 @@ helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
-| set | k8sScrMgr.container_prefix | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>**Default:** scr | No |
+| set | k8sScrMgr.container_prefix | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created components in Kubernetes are named 'scr-abc'<br>**Default:** scr | No |
 | set | k8sScrMgr.mas_pod | The prefix name of the MAS pod.<br>**Default:** sas-microanalytic-score | No |
 | set | k8sScrMgr.list_scr | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>**Default:** True | No |
 | set | k8sScrMgr.pull_scr | Enables the /k8s-scr-mgr endpoint to pull images from the Docker registry and load them into Kubernetes.<br>**Default:** True | No |
@@ -68,27 +67,26 @@ helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 | set | k8sScrMgr.getlog_scr | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>**Default:** True | No |
 | set | k8sScrMgr.getlog_mas | Enables the /getlog-mas endpoint to receive the log for MAS.<br>**Default:** True | No |
 | set-file | k8sScrMgr.scr_yaml_template | Fully qualified file name for the scr yaml file to load the SCR container. See [Yaml file to load SCR Container](#yaml-file-to-load-scr-container) for more information.<br>**Default:** If not used the default SCR yaml template is used. | No |
-| set | namespace.ns_scr | Set namespace to which the scr containers are loaded.<br>**Default:** scr | No |
 </details>
 
 > :bulb: **Tip**: See annotation *helm.sh/uninstall* in Kubernetes deployment for helm uninstall command.
 
 #### Yaml file to load SCR Container
-By default a yaml file template is used to load the SCR container into Kubernetes. You can overwrite the default template to adjust Kubernetes settings when loading a SCR container.
+By default, a yaml file template is used to load the SCR container into Kubernetes. You can overwrite the default template to adjust Kubernetes settings when loading a SCR container.
 Download the [template file](./data/config/scr-template.yaml) and edit the file as appropriate.
 You can load the template file using helm parameter *k8sScrMgr.scr_yaml_template*
 
 #### Configure for more than one Viya Publishing Destination
-If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a spcific publishing destination. Each container registry (publishing destinaton) will have its own dedicated namespace and database connection details. 
+If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a specific publishing destination. Each container registry (publishing destination) will have its own dedicated namespace and database connection details. 
 
-For each container registry (publishing destinaton) you need to set:
+For each container registry (publishing destination) you need to set:
 * namespace
 * dbCredentials
 * dockerCredentials.baseRepoURL
 * dockerCredentials.registryId
 * dockerCredentials.registryPassword
 
-The parameters are in section *scr* and will be called like *scr[x].namespace* where *x* is the number of the container registry you want to register. The first container registry starts with 0 and is compulsary.
+The parameters are in section *scr* and will be called like *scr[x].namespace* where *x* is the number of the container registry you want to register. The first container registry starts with 0 and is compulsory.
 
 ---
 
@@ -191,10 +189,10 @@ Run the step to receive a list of all pods running in the namespace linked to k8
 
 * **Pod name**<br>
 The name of the pod for wich you want the log information.<br>
-You don't need to type in the complete pod name, partions of it will work. E.g.: if the pod name is 'scr-mypod-7b7c55d84b-2fm87' you can just tyep 'mypod'.
+You don't need to type in the complete pod name, portion of it will work. E.g.: if the pod name is 'scr-mypod-7b7c55d84b-2fm87' you can just type 'mypod'.
 
 * **Show rows in log**
-This indecates how many rows from the log will be shown.
+This indicates how many rows from the log will be shown.
     * All rows<br>
     Shows the complete log
     * Top rows<br>
@@ -206,7 +204,7 @@ This indecates how many rows from the log will be shown.
 ![](./images/get-MAS-log.jpg)
 
 * **Show rows in log**
-This indecates how many rows from the log will be shown.
+This indicates how many rows from the log will be shown.
     * All rows<br>
     Shows the complete log
     * Top rows<br>
@@ -214,7 +212,7 @@ This indecates how many rows from the log will be shown.
     * Bottom rows<br>
     Show last number of rows as set in field **Number of rows**
 
-    > By default it will show the last 30 rows in the log.
+    > By default, it will show the last 30 rows in the log.
 
 <br>
 
@@ -236,4 +234,5 @@ Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL``
 %let k8s_scr_mgr_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
 
 ```
+
 
