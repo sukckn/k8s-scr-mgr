@@ -1,3 +1,5 @@
+{{- $scr_namespace := (default .Values.defaultScrNamespace (index .Values.scr 0).namespace) | lower | replace " " "-" | trunc 63 -}}
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,7 +9,7 @@ data:
   config: |
     class Config:
         HOST= '{{ required "Missing parameter 'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }}'
-        NAMESPACE= '{{ (index .Values.scr 0).namespace }}'
+        NAMESPACE= '{{ $scr_namespace }}'
         CONTAINER_PREFIX= '{{ .Values.k8sScrMgr.container_prefix }}'
         CONTAINER_REGISTRY= '{{ required "Missing parameter 'scr[0].dockerCredentials.baseRepoURL': --set scr[0].dockerCredentials.baseRepoURL=<container registry location (URI)>" (index .Values.scr 0).dockerCredentials.baseRepoURL }}'
         VIYA_NAMESPACE= '{{ .Values.k8sScrMgr.viya_namespace }}'

@@ -71,11 +71,6 @@ helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 
 > :bulb: **Tip**: See annotation *helm.sh/uninstall* in Kubernetes deployment for helm uninstall command.
 
-#### Yaml file to load SCR Container
-By default, a yaml file template is used to load the SCR container into Kubernetes. You can overwrite the default template to adjust Kubernetes settings when loading a SCR container.
-Download the [template file](./data/config/scr-template.yaml) and edit the file as appropriate.
-You can load the template file using helm parameter *k8sScrMgr.scr_yaml_template*
-
 #### Configure for more than one Viya Publishing Destination
 If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a specific publishing destination. Each container registry (publishing destination) will have its own dedicated namespace and database connection details. 
 
@@ -87,6 +82,11 @@ For each container registry (publishing destination) you need to set:
 * dockerCredentials.registryPassword
 
 The parameters are in section *scr* and will be called like *scr[x].namespace* where *x* is the number of the container registry you want to register. The first container registry starts with 0 and is compulsory.
+
+#### Yaml file to load SCR Container
+By default, a yaml file template is used to load the SCR container into Kubernetes. You can overwrite the default template to adjust Kubernetes settings when loading a SCR container.
+Download the [template file](./data/config/scr-template.yaml) and edit the file as appropriate.
+You can load the template file using helm parameter *k8sScrMgr.scr_yaml_template*
 
 ---
 
