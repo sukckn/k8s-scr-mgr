@@ -37,6 +37,7 @@ Download file [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) and edit it
 | DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** True |
 | GETLOG_SCR | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>***Default:*** True |
 | GETLOG_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** True |
+| NS_TO_REGISTRY_MAP | Maping between scr namespace and container registry. In a JSON structure as key:value pair set <scr namespace>:<container registry> |
 
 Copy the following file into directory ```~/k8s-scr-mgr```
 
@@ -195,7 +196,7 @@ If the SCR image accesses a database, you must create a database secret. You can
 
 ---
 
-### More than one Viya Publishing Destination
+### Configuration for more than one Viya Publishing Destination
 If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a spcific publishing destination. Each container registry (publishing destinaton) will have its own dedicated namespace and database connection details. 
 
 To register a second container registry (publishing destinaton) you need to repeat some of the above steps and adjust the templates for SCR load namespace:
