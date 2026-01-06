@@ -105,11 +105,15 @@ The **ID - K8S SCR Manager** custom step allows you to interact with the k8s-scr
 
 ---
 
-### Importing the Custom Step
+### Import the Custom Step
 To import custom step *ID - K8S SCR Manager*:
 * Open SAS Studio.
 * In your home folder (My Folder), create a sub-folder named ```custom steps```.
 * Upload file [ID - K8S SCR Manager.step](./data/custom_step/ID%20-%20K8S%20SCR%20Manager.step) into the *custom steps* folder.
+
+### Configure Custom Step
+Make sure the service URL for the customer step is correct. When you have installed *scr-k8s-mgr* via helm chart you can see the service URL at the end of the installation. 
+Use this URL in the custom step. In SAS Studio open the step in edit mode. Go to tab *Options* and ensure that the service URL is correct. Save the step.
 
 ---
 
