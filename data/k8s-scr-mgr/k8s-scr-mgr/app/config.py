@@ -1,8 +1,6 @@
 class Config:
-#    BASE_URL= '/k8s-scr-mgr'
-    CONTAINER_REGISTRY= 'decisioning.azurecr.io'
-    PORT= '8080'
     HOST= 'my-server.sas.com'
+    PORT= '8080'
     NAMESPACE= 'scr'
     CONTAINER_PREFIX= 'scr'
     VIYA_NAMESPACE= 'viya4'
@@ -13,3 +11,6 @@ class Config:
     DELETE_SCR= True
     GETLOG_SCR= True
     GETLOG_MAS= True
+    NS_TO_REGISTRY_MAP= {
+                        'scr': 'myregistry.azurecr.io'
+                        } 

@@ -5,40 +5,6 @@ import subprocess
 import base64
 
 ##########################################################################################
-# Function to get the container registry from the scr-docker-pull-secret
-##########################################################################################
-def get_dockerconfigjson(namespace):
-    msg= ''
-    try:
-        # Get the .dockerconfigjson field (still Base64-encoded)
-        result = subprocess.run(["kubectl", '--kubeconfig=/tmp/config', "get", "secret", "scr-docker-pull-secret", "-n", namespace, "-o", "jsonpath={.data.\\.dockerconfigjson}"], check=True, capture_output=True, text=True)
-        b64_value = result.stdout.strip()
-        if not b64_value:
-            msg= f"Empty .dockerconfigjson value received from scr-docker-pull-secret in namespace {namespace}."
-            return None, msg
-
-        # Decode Base64
-        decoded= base64.b64decode(b64_value)
-        try:
-            decoded= decoded.decode('utf-8')  # Convert bytes to string
-        except UnicodeDecodeError:
-            msg= f"Decoded .dockerconfigjson from scr-docker-pull-secret (namespace: {namespace}) is not valid UTF-8."
-            return None, msg
-        try:
-            dockerPull= json.loads(decoded)  # Validate JSON
-        except json.JSONDecodeError:
-            msg= f"Decoded .dockerconfigjson from scr-docker-pull-secret (namespace: {namespace}) is not valid JSON."
-            return None, msg
-
-        return list(dockerPull["auths"].keys())[0], msg
-    except subprocess.CalledProcessError as e:
-        msg= f"kubectl failed (exit {e.returncode}): {e.stderr}"
-        return None, msg
-    except Exception as e:
-        msg= f"Error: {e}"
-        return None, msg
-
-##########################################################################################
 def create_blueprint(base_url, k8s_scr_mgr_version):
     # Create a Blueprint for the k8s-scr-mgr routes
     bp= Blueprint('k8s-scr-mgr', __name__, url_prefix=base_url)
@@ -68,8 +34,20 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >image_name< is required'}), status
         IMAGE_NAME= IMAGE_NAME.lower() # Kubernetes image names must be lowercase
-        SCR_NAME= IMAGE_NAME.replace('_', '-') # Kubernetes cannot contain underscores
 
+        # get deployment name. if not provided, derive from image name
+        SCR_NAME= inputData.get('deployment_name')
+        if not SCR_NAME:
+            SCR_NAME= IMAGE_NAME.replace('_', '-') # Kubernetes cannot contain underscores
+        else:
+            SCR_NAME= SCR_NAME.lower() # Kubernetes deployment names must be lowercase
+
+        # set the endpoint for SCR to be called on. By default it is the same as the deployment name
+        SCR_ENDPOINT= inputData.get('scr_endpoint')
+        if not SCR_ENDPOINT:
+            SCR_ENDPOINT= SCR_NAME   
+
+        # the container image tag in the registry
         SCR_TAG= inputData.get('scr_tag')
         if not SCR_TAG:
             status= 400
@@ -87,22 +65,24 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
 
         # indicator if db secret is to be mounted (true/false)
         SET_DB_SECRET= int(inputData.get('db_secret'))
-        if SET_DB_SECRET == None:
+        if not SET_DB_SECRET:
             status= 400
             return jsonify({'error': 'Error: Parameter >db_secret< is required'}), status
 
         # get namespace from input or config
         namespace= inputData.get('namespace')
-        if namespace == None:
+        if not namespace:
             namespace= current_app.config.get('NAMESPACE', '')
             if len(namespace) == 0:
                 status= 400
                 return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
 
-        container_registry, msg = get_dockerconfigjson(namespace)
+        # get container registry from config mapping for given namespace
+        ns_to_registry_map= current_app.config.get('NS_TO_REGISTRY_MAP', {'NS_TO_REGISTRY_MAP': 'not configured'})
+        container_registry= ns_to_registry_map.get(namespace)
         if not container_registry:
-            status= 400 
-            return jsonify({'error': f'Error: Problem retrieving container registry from scr-docker-pull-secret: {msg}'}), status
+            status= 400
+            return jsonify({'error': f'Error: No container registry found for namespace >{namespace}< in k8s-scr-mgr config. {ns_to_registry_map}'}) , status
 
         # get parameters from config or use default
         host= current_app.config.get('HOST', '127.0.0.1')
@@ -143,6 +123,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         yaml_content= yaml_content.replace('<ENV-VARS>', env)
         yaml_content= yaml_content.replace('<DB-SECRET-MOUNT>', db_secret_mount)
         yaml_content= yaml_content.replace('<DB-SECRET-VOLUME>', db_secret_volume)
+        yaml_content= yaml_content.replace('<SCR-ENDPOINT>', SCR_ENDPOINT)
 
         # Write the modified content to a new yaml file
         yaml_file= f'./yaml/scr-{SCR_NAME}.yaml'
@@ -168,7 +149,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         # Return a response
         return jsonify({
             'message': msg,
-            'url': f'https://{host}/{SCR_NAME}'
+            'url': f'https://{host}/{SCR_ENDPOINT}'
                     }), 200
 
 ##########################################################################################
@@ -192,7 +173,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
 
         # get namespace from input or config
         namespace= inputData.get('namespace')
-        if namespace == None:
+        if not namespace:
             namespace= current_app.config.get('NAMESPACE', '')
             if len(namespace) == 0:
                 status= 400
@@ -231,7 +212,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
 
         # get namespace from input or config
         namespace= inputData.get('namespace')
-        if namespace == None:
+        if not namespace:
             namespace= current_app.config.get('NAMESPACE', '')
             if len(namespace) == 0:
                 status= 400
@@ -313,7 +294,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
 
         # get namespace from input or config
         namespace= inputData.get('namespace')
-        if namespace == None:
+        if not namespace:
             namespace= current_app.config.get('NAMESPACE', '')
             if len(namespace) == 0:
                 status= 400
@@ -410,7 +391,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         
         # get namespace from input or config
         namespace= inputData.get('namespace')
-        if namespace == None:
+        if not namespace:
             namespace= current_app.config.get('NAMESPACE', '')
             if len(namespace) == 0:
                 status= 400

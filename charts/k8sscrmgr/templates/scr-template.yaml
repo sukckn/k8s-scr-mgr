@@ -95,7 +95,7 @@ data:
       - host: <HOST>
         http:
           paths:
-          - path: /<SCR-NAME>
+          - path: /<SCR-ENDPOINT>
             pathType: Prefix
             backend:
               service:

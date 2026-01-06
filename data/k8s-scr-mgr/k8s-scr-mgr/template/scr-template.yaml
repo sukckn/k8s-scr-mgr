@@ -8,6 +8,11 @@
 # <SCR-TAG>:           Container tag
 # <IMAGE-PULL-POLICY>: Image pull policy
 # <HOST>:              URL where Kubernetes is running
+# <SCR-ENDPOINT>:      The endpoint path for the SCR service
+# <CONTAINER-REGISTRY>:Container registry where the SCR image is stored
+# <ENV-VARS>:          Environment variables to be added to the SCR container
+# <DB-SECRET-MOUNT>:   Volume mount for database secrets
+# <DB-SECRET-VOLUME>:  Volume for database secrets
 #################################################################################################
 apiVersion: apps/v1
 kind: Deployment
@@ -97,7 +102,7 @@ spec:
   - host: <HOST>
     http:
       paths:
-      - path: /<SCR-NAME>
+      - path: /<SCR-ENDPOINT>
         pathType: Prefix
         backend:
           service:
