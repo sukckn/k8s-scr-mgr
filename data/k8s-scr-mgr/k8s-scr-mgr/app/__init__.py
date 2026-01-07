@@ -1,6 +1,6 @@
 from flask import Flask
 from app.routes.routes import create_blueprint
-k8s_scr_mgr_version= '1.0'
+k8s_scr_mgr_version= '1.5.0'
 
 def create_app():
     app= Flask(__name__)  

@@ -183,7 +183,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         host= current_app.config.get('HOST', '127.0.0.1')
 
         try:
-            result= subprocess.run(['kubectl', 'rollout', 'restart', 'deployment', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
+            result= subprocess.run(['kubectl', '--kubeconfig=/tmp/config', 'rollout', 'restart', 'deployment', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
@@ -210,9 +210,9 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         if not endpoint_available:
             return jsonify({'error': 'Endpoint "/list-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
 
-        # get namespace from input or config
-        namespace= inputData.get('namespace')
-        if not namespace:
+        # get namespace from URL parameter or config
+        namespace= request.args.get('namespace', '')
+        if len(namespace) == 0:
             namespace= current_app.config.get('NAMESPACE', '')
             if len(namespace) == 0:
                 status= 400
