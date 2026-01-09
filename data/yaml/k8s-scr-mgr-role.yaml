@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: scr # namesspace where scr containers are loaded
   name: k8s-scr-mgr
+  namespace: scr # namesspace where scr containers are loaded
 rules:
 - apiGroups: ["apps"]
   resources: ["deployments", "replicasets"]

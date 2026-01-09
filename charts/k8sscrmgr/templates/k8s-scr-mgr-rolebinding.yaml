@@ -1,21 +1,21 @@
-{{- $ns := "" -}}
+
 {{- range $i, $item := .Values.scr }}
+  {{- /* Compute normalized namespace */}}
+  {{- $ns := "" -}}
   {{- if eq $i 0 }}
-    {{- /* For the first item: default to "scr" if missing */}}
     {{- $ns = (default $.Values.defaultScrNamespace $item.namespace) | lower | replace " " "-" | trunc 63 -}}
   {{- else }}
-    {{- /* For subsequent items: hard-require namespace */}}
-    {{- $ns = (required (printf "Missing parameter 'scr[%d].namespace': --set scr[%d].namespace=<container registry location (URI)>" $i $i) $item.namespace) | lower | replace " " "-" | trunc 63 -}}
+    {{- $ns = (required (printf "Missing parameter 'scr[%d].namespace': --set scr[%d].namespace=<namespace>" $i $i) $item.namespace) | lower | replace " " "-" | trunc 63 -}}
   {{- end }}
-  
-  {{- $namespace := $ns -}}
+
+---
   
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ $.Release.Name }}-binding-{{ $namespace }}
-  namespace: {{ $namespace | quote }} # namespace where SCRs are deployed
+  name: {{ $.Release.Name }}-binding-{{ $ns }}
+  namespace: {{ $ns | quote }} # namespace where SCRs are deployed
 subjects:
 - kind: ServiceAccount
   name: default
@@ -23,6 +23,6 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ $.Release.Name }}-role
+  name: {{ $.Release.Name }}-role 
   
 {{- end }}

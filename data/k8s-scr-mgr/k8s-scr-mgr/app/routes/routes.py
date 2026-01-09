@@ -219,7 +219,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
                 return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
 
         # Run kubectl to get pods 
-        command= ["kubectl", "get", "pods", "-n", namespace, "-o", "json"]
+        command= ["kubectl", '--kubeconfig=/tmp/config', "get", "pods", "-n", namespace, "-o", "json"]
         try:
             result= subprocess.run(command, capture_output=True, text=True, check=True)
         except subprocess.CalledProcessError as e:
@@ -302,7 +302,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
 
         # Delete the deployment
         try:
-            result= subprocess.run(['kubectl', 'delete', 'deployment', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
+            result= subprocess.run(['kubectl', '--kubeconfig=/tmp/config', 'delete', 'deployment', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
@@ -319,7 +319,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
 
         # Delete the service
         try:
-            result= subprocess.run(['kubectl', 'delete', 'service', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
+            result= subprocess.run(['kubectl', '--kubeconfig=/tmp/config', 'delete', 'service', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
@@ -336,7 +336,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
 
         # Delete the ingress resource
         try:
-            result= subprocess.run(['kubectl', 'delete', 'ingress', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
+            result= subprocess.run(['kubectl', '--kubeconfig=/tmp/config', 'delete', 'ingress', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
         except subprocess.CalledProcessError as e:
             status= 424 # Failed Dependency
             # Return an error response        
@@ -398,7 +398,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
                 return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
 
         # Define the command to get podname
-        command= f"kubectl get pods --namespace {namespace} | grep {POD_NAME}"
+        command= f"kubectl get pods --kubeconfig=/tmp/config --namespace {namespace} | grep {POD_NAME}"
 
         # get pod name
         try:
@@ -432,7 +432,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         podname= podname[0:podname.find(' ')]  # Extract the pod name from the output
 
         # Define the command to get log
-        command= f"kubectl logs --namespace {namespace} {podname}"
+        command= f"kubectl logs --kubeconfig=/tmp/config --namespace {namespace} {podname}"
 
         log= []
         try:
@@ -507,7 +507,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         # get parameters from config
         namespace= current_app.config.get('VIYA_NAMESPACE', 'default')
 
-        command= ["kubectl", "get", "pods", "-n", namespace]
+        command= ["kubectl", '--kubeconfig=/tmp/config', "get", "pods", "-n", namespace]
 
         # get podname
         try:
@@ -540,7 +540,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             return jsonify({'error': f'Pod with name >{prefix_pod_name}< not found in namespace >{namespace}<.'}), status
 
         # Define the command to get log
-        command= ["kubectl", "logs", "--namespace", namespace, podname, "-c", "sas-microanalytic-score"]
+        command= ["kubectl", '--kubeconfig=/tmp/config', "logs", "--namespace", namespace, podname, "-c", "sas-microanalytic-score"]
 
         log= []
         try:

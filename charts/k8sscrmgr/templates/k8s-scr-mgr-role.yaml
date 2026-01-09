@@ -1,15 +1,39 @@
+
+{{- range $i, $item := .Values.scr }}
+  {{- /* Compute normalized namespace */}}
+  {{- $ns := "" -}}
+  {{- if eq $i 0 }}
+    {{- $ns = (default $.Values.defaultScrNamespace $item.namespace) | lower | replace " " "-" | trunc 63 -}}
+  {{- else }}
+    {{- $ns = (required (printf "Missing parameter 'scr[%d].namespace': --set scr[%d].namespace=<namespace>" $i $i) $item.namespace) | lower | replace " " "-" | trunc 63 -}}
+  {{- end }}
+
+---
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Release.Name }}-role
-  namespace: {{ .Release.Namespace }} # namespace where k8s-scr-mgr pod is running
+  name: {{ $.Release.Name }}-role
+  namespace: {{ $ns | quote }} # namespace where SCRs are deployed
 rules:
-- apiGroups: ["apps"]
-  resources: ["deployments", "replicasets"]
-  verbs: ["get", "list", "watch", "update", "patch", "delete"]
-- apiGroups: [""]
-  resources: ["pods", "services", "pods/log"]
-  verbs: ["get", "list", "watch", "update", "patch", "delete"]
-- apiGroups: ["networking.k8s.io"]
-  resources: ["ingresses"]
-  verbs: ["delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "services", "pods/log"]
+    verbs: ["get", "list", "watch", "update", "patch", "delete"]
+metadata:
+  name: {{ $.Release.Name }}-role
+  namespace: {{ $ns | quote }} # namespace where SCRs are deployed
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "services", "pods/log"]
+    verbs: ["get", "list", "watch", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["delete"]
+
+{{- end }}
