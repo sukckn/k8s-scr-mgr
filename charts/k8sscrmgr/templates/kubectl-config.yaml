@@ -8,5 +8,5 @@ data:
 {{- if .Values.k8sScrMgr.kubeconfig }}
 {{ .Values.k8sScrMgr.kubeconfig | nindent 4 }}
 {{- else }}
-{{ required "Missing parameter 'k8sScrMgr.kubeconfig': --set-file k8sScrMgr.kubeconfig=<kubeconfig file>" .Values.k8sScrMgr.kubeconfig }}
+{{ required "'k8sScrMgr.kubeconfig': --set-file k8sScrMgr.kubeconfig=<kubeconfig file>" .Values.k8sScrMgr.kubeconfig }}
 {{- end }}

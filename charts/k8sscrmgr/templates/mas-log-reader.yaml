@@ -1,12 +1,12 @@
 # mas-log-reader.yaml
 # This file defines the Role, RoleBinding, ClusterRole, and ClusterRoleBinding
-{{- $existing := lookup "rbac.authorization.k8s.io/v1" "Role" ( .Values.k8sScrMgr.viya_namespace ) "mas-log-reader" -}}
+{{- $existing := lookup "rbac.authorization.k8s.io/v1" "Role" ( .Values.k8sScrMgr.viyaNamespace ) "mas-log-reader" -}}
 {{- if not $existing }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: mas-log-reader
-  namespace: {{ .Values.k8sScrMgr.viya_namespace }} # namespace where SAS Viya is running
+  namespace: {{ .Values.k8sScrMgr.viyaNamespace }} # namespace where SAS Viya is running
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -20,13 +20,13 @@ rules:
 
 ---
 
-{{- $existing := lookup "rbac.authorization.k8s.io/v1" "Role" ( .Values.k8sScrMgr.viya_namespace ) "mas-log-reader-binding" -}}
+{{- $existing := lookup "rbac.authorization.k8s.io/v1" "Role" ( .Values.k8sScrMgr.viyaNamespace ) "mas-log-reader-binding" -}}
 {{- if not $existing }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: mas-log-reader-binding
-  namespace: {{ .Values.k8sScrMgr.viya_namespace }} # namespace where SAS Viya is running
+  namespace: {{ .Values.k8sScrMgr.viyaNamespace }} # namespace where SAS Viya is running
 subjects:
 - kind: ServiceAccount
   name: default

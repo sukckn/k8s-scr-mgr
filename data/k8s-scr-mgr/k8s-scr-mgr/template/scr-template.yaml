@@ -13,6 +13,7 @@
 # <ENV-VARS>:          Environment variables to be added to the SCR container
 # <DB-SECRET-MOUNT>:   Volume mount for database secrets
 # <DB-SECRET-VOLUME>:  Volume for database secrets
+# <DOCKER-PULL-SECRET>: Docker pull secret name
 #################################################################################################
 apiVersion: apps/v1
 kind: Deployment
@@ -59,7 +60,7 @@ spec:
       restartPolicy: Always
       securityContext: {}
       imagePullSecrets:
-      - name: scr-docker-pull-secret
+      - name: <DOCKER-PULL-SECRET>
       volumes:
 <DB-SECRET-VOLUME>
 ---

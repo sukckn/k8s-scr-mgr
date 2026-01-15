@@ -1,3 +1,4 @@
+{{- $seen := dict -}} {{/* set of namespaces we've already emitted */}}
 {{- $ns := "" -}}
 {{- range $i, $item := .Values.scr }}
   {{- if eq $i 0 }}
@@ -5,14 +6,19 @@
     {{- $ns = (default $.Values.defaultScrNamespace $item.namespace) | lower | replace " " "-" | trunc 63 -}}
   {{- else }}
     {{- /* For subsequent items: hard-require namespace */}}
-    {{- $ns = (required (printf "Missing parameter 'scr[%d].namespace': --set scr[%d].namespace=<container registry location (URI)>" $i $i) $item.namespace) | lower | replace " " "-" | trunc 63 -}}
+    {{- $ns = (required (printf "'scr[%d].namespace': --set scr[%d].namespace=<namespace>" $i $i) $item.namespace) | lower | replace " " "-" | trunc 63 -}}
   {{- end }}
   
   {{- $namespace := $ns -}}
 
-  {{/* Create Namespace if not exists */}}
-  {{- $existing := (lookup "v1" "Namespace" "" $namespace) -}}
-  {{- if not $existing }}
+  {{- /* Only create Role once per unique namespace */}}
+  {{- if not (hasKey $seen $ns) }}
+    {{- /* Mark as seen before rendering to be safe in nested/ranged contexts */}}
+    {{- $_ := set $seen $ns true -}}
+
+    {{/* Create Namespace if not exists */}}
+    {{- $existing := (lookup "v1" "Namespace" "" $namespace) -}}
+    {{- if not $existing }}
 
 ---
 apiVersion: v1
@@ -21,6 +27,6 @@ metadata:
   name: {{ $namespace }}
   annotations:
     "helm.sh/resource-policy": keep
-
+    {{- end -}}  
   {{- end -}}  
 {{- end }}  

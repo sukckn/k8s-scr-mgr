@@ -9,7 +9,7 @@ k8sScrMgr:
   host:
   kubeconfig:
   scr_yaml_template:
-  viya_namespace: viya
+  viyaNamespace: viya
   container_prefix: scr
   mas_pod: sas-microanalytic-score
   list_scr: True
@@ -21,9 +21,11 @@ k8sScrMgr:
 
 # List of scr parameters used when creating more than one SCR namespace
 scr:
-  - namespace:
-    dbCredentials:
+  - publishingDestination: ''
+    namespace: ''
+    dbCredentials: ''
+    setDbSecret: False
     dockerCredentials:
-      baseRepoURL:
-      registryId:
-      registryPassword:
+      baseRepoURL: ''
+      registryId: ''
+      registryPassword: ''

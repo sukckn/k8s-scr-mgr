@@ -1,7 +1,5 @@
 class Config:
     HOST= 'my-server.sas.com'
-    PORT= '8080'
-    NAMESPACE= 'scr'
     CONTAINER_PREFIX= 'scr'
     VIYA_NAMESPACE= 'viya4'
     MAS_POD= 'sas-microanalytic-score'
@@ -11,6 +9,10 @@ class Config:
     DELETE_SCR= True
     GETLOG_SCR= True
     GETLOG_MAS= True
-    NS_TO_REGISTRY_MAP= {
-                        'scr': 'myregistry.azurecr.io'
-                        } 
+    PUBLISHING_DESTINATIONS= {
+        'AzureDocker-PG': {
+            'namespace': 'scr',
+            'registry': 'myregistry.azurecr.io',
+            'setDbSecret': True
+        }
+    }

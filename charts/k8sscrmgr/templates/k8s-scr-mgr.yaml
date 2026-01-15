@@ -99,10 +99,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - {{ required "Missing parameter 'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }} # set url for the server where you deploy k8s-scr-mgr
+    - {{ required "'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }} # set url for the server where you deploy k8s-scr-mgr
     secretName: net-sas-com-app-certs
   rules:
-  - host: {{ required "Missing parameter 'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }} # set url for the server where you deploy k8s-scr-mgr
+  - host: {{ required "'k8sScrMgr.host': --set k8sScrMgr.host=<k8s-scr-mgr URL>" .Values.k8sScrMgr.host }} # set url for the server where you deploy k8s-scr-mgr
     http:
       paths:
       - path: /{{ .Release.Name }}

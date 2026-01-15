@@ -5,6 +5,36 @@ import subprocess
 import base64
 
 ##########################################################################################
+def pub_dest(inputData, lookup):
+    msg= ''
+    # get settings for publishing destinations from config mapping
+    PUBLISHING_DESTINATIONS= current_app.config.get('PUBLISHING_DESTINATIONS', {})
+    if not PUBLISHING_DESTINATIONS:
+        msg= 'Error: No publishing destinations found in k8s-scr-mgr config.'
+        return None, msg
+
+    # get publishing destination from input parameters. If not provided, use the first one from the config mapping
+    pub_dest_name= inputData.get('pub_dest_name')
+    if not pub_dest_name:
+        pub_dest_name= list(PUBLISHING_DESTINATIONS.keys())[0]
+    pub_dest_name= pub_dest_name.lower()
+
+    if lookup == 'pub_dest_name':
+        return pub_dest_name, msg   
+
+    if not PUBLISHING_DESTINATIONS.get(pub_dest_name):
+        msg= f'Error: Publishing destination >{pub_dest_name}< not found in k8s-scr-mgr config.\nAvailable Publishing Destinations: {list(PUBLISHING_DESTINATIONS.keys())}'
+        return None, msg
+
+    # get namespace, registry or setDbSecret from publishing destination
+    lookup_value= PUBLISHING_DESTINATIONS[pub_dest_name].get(lookup, '')
+    if len(lookup_value) == 0:
+        msg= f'Error: Parameter >{lookup}< not set for publishing destination >{pub_dest_name}<'
+        return None, msg
+
+    return lookup_value, msg
+
+##########################################################################################
 def create_blueprint(base_url, k8s_scr_mgr_version):
     # Create a Blueprint for the k8s-scr-mgr routes
     bp= Blueprint('k8s-scr-mgr', __name__, url_prefix=base_url)
@@ -28,17 +58,17 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         # set http status code
         status= 200
 
-        # get input parameters
+        # get scr image name from input parameters
         IMAGE_NAME= inputData.get('image_name')
         if not IMAGE_NAME:
             status= 400
             return jsonify({'error': 'Error: Parameter >image_name< is required'}), status
         IMAGE_NAME= IMAGE_NAME.lower() # Kubernetes image names must be lowercase
 
-        # get deployment name. if not provided, derive from image name
+        # get deployment name. If not provided, derive from image name
         SCR_NAME= inputData.get('deployment_name')
         if not SCR_NAME:
-            SCR_NAME= IMAGE_NAME.replace('_', '-') # Kubernetes cannot contain underscores
+            SCR_NAME= IMAGE_NAME.replace('_', '-') # Kubnernetes cannot contain underscores
         else:
             SCR_NAME= SCR_NAME.lower() # Kubernetes deployment names must be lowercase
 
@@ -63,29 +93,39 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >image_pull_policy< is required'}), status
 
-        # indicator if db secret is to be mounted (true/false)
-        SET_DB_SECRET= int(inputData.get('db_secret'))
-        if not SET_DB_SECRET:
+        # get namespace from publishing destination
+        namespace, msg= pub_dest(inputData, 'namespace')
+        if msg:
             status= 400
-            return jsonify({'error': 'Error: Parameter >db_secret< is required'}), status
+            return jsonify({'error': msg}), status
 
-        # get namespace from input or config
-        namespace= inputData.get('namespace')
-        if not namespace:
-            namespace= current_app.config.get('NAMESPACE', '')
-            if len(namespace) == 0:
-                status= 400
-                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
-
-        # get container registry from config mapping for given namespace
-        ns_to_registry_map= current_app.config.get('NS_TO_REGISTRY_MAP', {'NS_TO_REGISTRY_MAP': 'not configured'})
-        container_registry= ns_to_registry_map.get(namespace)
-        if not container_registry:
+        # get indicator if db secret is to be mounted (true/false)
+        SET_DB_SECRET, msg= pub_dest(inputData, 'setDbSecret')
+        if msg:
             status= 400
-            return jsonify({'error': f'Error: No container registry found for namespace >{namespace}< in k8s-scr-mgr config. {ns_to_registry_map}'}) , status
+            return jsonify({'error': msg}), status
+
+        # get container registry from publishing destination
+        container_registry, msg= pub_dest(inputData, 'registry')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
+
+        # get publishing destination name
+        pub_dest_name, msg= pub_dest(inputData, 'pub_dest_name')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
+
+        # get docker pull secret name
+        docker_pull_secret= f'pull-{pub_dest_name}'.lower()
 
         # get parameters from config or use default
-        host= current_app.config.get('HOST', '127.0.0.1')
+        host= current_app.config.get('HOST', None)
+        if host is None:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >host< not set in k8s-scr-mgr config.'}), status
+
         cont_prefix= current_app.config.get('CONTAINER_PREFIX', '')
 
         # if a prefix for the SCR container is to be set we add an dash (-) to it
@@ -101,11 +141,13 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
                 val= v[list(v.keys())[0]]
                 env+= f'        - name: "{na}"\n          value: "{val}"\n'
 
+        # set the db secret name. It is: db-<pub_dest_name>
+        db_secret_name= f'db-{pub_dest_name}'.lower()
         db_secret_mount= ''
         db_secret_volume= ''
         if SET_DB_SECRET:
             db_secret_mount= '        - name: scr-db-secrets\n          mountPath: /opt/scr/secrets/db'
-            db_secret_volume= '      - name: scr-db-secrets\n        secret:\n          secretName: scr-db-secrets\n          items:\n          - key: db.secrets\n            path: db.secrets'
+            db_secret_volume= f'      - name: scr-db-secrets\n        secret:\n          secretName: {db_secret_name}\n          items:\n          - key: db.secrets\n            path: db.secrets'
 
         # Open yaml template and replace placeholders
         with open('./template/scr-template.yaml', 'r') as file:
@@ -124,6 +166,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         yaml_content= yaml_content.replace('<DB-SECRET-MOUNT>', db_secret_mount)
         yaml_content= yaml_content.replace('<DB-SECRET-VOLUME>', db_secret_volume)
         yaml_content= yaml_content.replace('<SCR-ENDPOINT>', SCR_ENDPOINT)
+        yaml_content= yaml_content.replace('<DOCKER-PULL-SECRET>', docker_pull_secret)
 
         # Write the modified content to a new yaml file
         yaml_file= f'./yaml/scr-{SCR_NAME}.yaml'
@@ -171,16 +214,17 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >deployment_name< is required'}), status
 
-        # get namespace from input or config
-        namespace= inputData.get('namespace')
-        if not namespace:
-            namespace= current_app.config.get('NAMESPACE', '')
-            if len(namespace) == 0:
-                status= 400
-                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
+        # get namespace from publishing destination
+        namespace, msg= pub_dest(inputData, 'namespace')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
 
         # get parameters from config or use default
-        host= current_app.config.get('HOST', '127.0.0.1')
+        host= current_app.config.get('HOST', None)
+        if host is None:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >host< not set in k8s-scr-mgr config.'}), status
 
         try:
             result= subprocess.run(['kubectl', '--kubeconfig=/tmp/config', 'rollout', 'restart', 'deployment', DEPLOYMENT_NAME, '-n', namespace], capture_output=True, text=True)
@@ -209,14 +253,14 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         endpoint_available= current_app.config.get('LIST_SCR', False)
         if not endpoint_available:
             return jsonify({'error': 'Endpoint "/list-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
-
-        # get namespace from URL parameter or config
-        namespace= request.args.get('namespace', '')
-        if len(namespace) == 0:
-            namespace= current_app.config.get('NAMESPACE', '')
-            if len(namespace) == 0:
-                status= 400
-                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
+################
+        inputData= request.args
+################
+        # get namespace from publishing destination
+        namespace, msg= pub_dest(inputData, 'namespace')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
 
         # Run kubectl to get pods 
         command= ["kubectl", '--kubeconfig=/tmp/config', "get", "pods", "-n", namespace, "-o", "json"]
@@ -235,9 +279,9 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         # Parse JSON
         pods= json.loads(result.stdout)
 
-        list= []
+        k8s_list= []
         heading= ['Pod Name', 'Status', 'Age', 'Deployment Name']
-        list.append(heading)
+        k8s_list.append(heading)
         # Print pod name, status, age, and deployment name
         for pod in pods["items"]:
             name= pod["metadata"]["name"]
@@ -266,10 +310,10 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             deployment_name= "-".join(replicaset_name.split("-")[:-1]) if replicaset_name != "Unknown" else "Unknown"
 
             # Append to the list
-            list.append([name, status, age_str, deployment_name])
+            k8s_list.append([name, status, age_str, deployment_name])
         # Return the list as JSON
         return jsonify({
-            'list':list,
+            'list':k8s_list,
             'ns': namespace
             }), 200
 
@@ -292,13 +336,11 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': 'Error: Parameter >deployment_name< is required'}), status
 
-        # get namespace from input or config
-        namespace= inputData.get('namespace')
-        if not namespace:
-            namespace= current_app.config.get('NAMESPACE', '')
-            if len(namespace) == 0:
-                status= 400
-                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
+        # get namespace from publishing destination
+        namespace, msg= pub_dest(inputData, 'namespace')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
 
         # Delete the deployment
         try:
@@ -388,14 +430,12 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         if NUM_ROWS < 0:
             status= 400
             return jsonify({'error': 'Error: Parameter >num_rows< must be greater than or equal to 0'}), status
-        
-        # get namespace from input or config
-        namespace= inputData.get('namespace')
-        if not namespace:
-            namespace= current_app.config.get('NAMESPACE', '')
-            if len(namespace) == 0:
-                status= 400
-                return jsonify({'error': 'Error: Parameter >namespace< is required'}), status
+
+        # get namespace from publishing destination
+        namespace, msg= pub_dest(inputData, 'namespace')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
 
         # Define the command to get podname
         command= f"kubectl get pods --kubeconfig=/tmp/config --namespace {namespace} | grep {POD_NAME}"
