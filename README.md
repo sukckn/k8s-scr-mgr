@@ -154,7 +154,12 @@ The name of the SCR container image in the Docker registry
 * **Container Image Tag**<br>
 The tag name of the image you want to load. E.g.: latest or 6
 * **Owner**<br>
-Set a Kubernetes lable for the owner of the scr image. Information who to contact by question about the image
+Set a Kubernetes lable for the owner of the scr image. Information who to contact by question about the image. 
+    * Max 63 characters.
+    * Lowercase / uppercase letters: A–Z a–z
+    * Numbers: 0–9
+    * Special characters: - _ .
+    * Start and end with an alphanumeric character.
 * **Image Pull Policy**,br
 Set how the image should get pulled if the pod gets restarted.<br>
 Options:
@@ -181,13 +186,48 @@ Set the number of environment variables you want to set for the scr container
 
 >❗**Note:** When you have loaded a SCR container, you will get a list of all *loggers* and *environment variables* that have been set.
 
-<details>
-<summary>Load SCR image</summary>
+>❗**Note:** You can change the loggers and environment variables by running *Pull image* again. When doing this you have to use the same value for *Owner* as you have used when you deployed it the first time. 
 
-![](./images/k8s-scr-mgr-scrpull01.gif)
+<details><summary>Load SCR image</summary>
+
+*
+    <details>
+    <summary>Load SCR image</summary>
+
+    ![](./images/scrpull02.gif)
+    </details>
+
+*
+    <details>
+    <summary>Load SCR image (using SCR logger)</summary>
+
+    ![](./images/k8s-scr-mgr-scrpull01.gif)
+    </details>
 </details>
 
+<details>
+<summary>Install kubectl on Windows</summary>
+
+* Download the *kubectl* binary:
+    * Go to the [Kubernetes releases page](https://kubernetes.io/releases/download/).
+    * Locate the latest stable release for Windows
+    * Download the *kubectl.exe* file.
+
+    <details>
+    <summary>Download correct kubectl.exe</summary>
+
+    If you are not sure which *kubectl.exe* to download (386, amd64, arm64), check your Windows architecture:
+
+    * Press **Windows Key + R**, type *msinfo32*, and hit **Enter**.
+    * Look for *System Type*:
+        * If it says **x64-based PC**, you need **amd64**.
+        * If it says **ARM-based PC**, you need **arm64**.
+        * If it says **x86-based PC**, you need **386**.
+    </details>  
+
+
 ---
+
 #### Restart pod
 ![](./images/restart-pod.jpg)
 
