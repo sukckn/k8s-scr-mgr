@@ -27,7 +27,6 @@ Download file [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) and edit it
 | *Name* | *Comment* |
 | ---    | ---       |
 | HOST | External host address (typically the hostname) where *k8s-scr-mgr* is accessible. (E.g., myserver.sas.com) |
-| NAMESPACE | Kubernetes namespace dedicated to load SCR containers.<br>**Default:** scr |
 | CONTAINER_PREFIX | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created componentes in Kubernetes are named 'scr-abc'<br>***Default:*** no prefix
 | VIYA_NAMESPACE | The Kubernetes namespace where Viya is installed |
 | MAS_POD | The prefix of the MAS POD.<br>***Default:*** *sas-microanalytic-score* |
@@ -36,8 +35,8 @@ Download file [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) and edit it
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** True |
 | DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** True |
 | GETLOG_SCR | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>***Default:*** True |
-| GETLOG_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** True |
-| NS_TO_REGISTRY_MAP | Maping between scr namespace and container registry. In a JSON structure as key:value pair set <scr namespace>:<container registry> |
+| GETLO G_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** True |
+| PUBLISHING_DESTINATIONS | Maping for Viya publishing destination. See [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) for details. |
 
 Copy the following file into directory ```~/k8s-scr-mgr```
 
@@ -86,7 +85,9 @@ To load *k8s-scr-mgr* into Kubernetes, you must first create a Kubernetes secret
 1. Download file [scr-secret-docker.yaml](./data/yaml/scr-secret-docker.yaml)
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-docker.yaml* to the correct namespace.
 
-2. Open the file in an editor and replace the placeholder &lt;DOCKER-PULL-SECRET&gt; with your Docker registry credentials.
+2. Open the file in an editor<br>
+    2.1 Replace the placeholder &lt;PUBLISHING-DESTINATION&gt; with the publishing destination you are configuring.<br>
+    2.2 Replace the placeholder &lt;DOCKER-PULL-SECRET&gt; with your Docker registry credentials.
 
     **Example: Azure Docker Registry**
     * Update the JSON structure with your registry details:
@@ -131,6 +132,9 @@ To load *k8s-scr-mgr* into Kubernetes, you must first create a Kubernetes secret
     cd ~/k8s-scr-mgr
     kubectl apply -f scr-secret-docker.yaml
     ```
+
+>❗**Note**: You have to repeat this step for every publishing destination you register!
+
 ---
 
 #### 2. Create Database Secret
@@ -139,7 +143,9 @@ If the SCR image accesses a database, you must create a database secret. You can
 1. Download file [scr-secret-db.yaml](./data/yaml/scr-secret-db.yaml)
     >❗**Note**: If you don't use the default namespace ```scr``` to load the SCR containers you need to change *namespace: scr* in file *scr-secret-db.yaml* to the correct namespace.
 
-2. Open the file and replace &lt;DB-SECRET&gt; with your database connection string.
+2. Open the file in an editor<br>
+    2.1 Replace the placeholder &lt;PUBLISHING-DESTINATION&gt; with the publishing destination you are configuring.<br>
+    2.2 Open the file and replace &lt;DB-SECRET&gt; with your database connection string.
 
     **Example: PostgreSQL Connection**
     * Example connection string:
@@ -164,6 +170,8 @@ If the SCR image accesses a database, you must create a database secret. You can
     cd ~/k8s-scr-mgr
     kubectl apply -f scr-secret-db.yaml
     ```
+>❗**Note**: You have to repeat this step for every publishing destination you register that is using a database connetion!
+
 ---
 #### 3. Deploy k8s-scr-mgr to Kubernetes
 1. Download the following files:
@@ -196,7 +204,7 @@ If the SCR image accesses a database, you must create a database secret. You can
 
 ---
 
-### Configuration for more than one Viya Publishing Destination
+### Configuration for more than one SAS Viya Publishing Destination
 If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a spcific publishing destination. Each container registry (publishing destinaton) will have its own dedicated namespace and database connection details. 
 
 To register a second container registry (publishing destinaton) you need to repeat some of the above steps and adjust the templates for SCR load namespace:
