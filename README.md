@@ -21,20 +21,22 @@ Once deployed, the `k8s-scr-mgr` container provides a service accessible via cus
 You can install k8s-scr-mgr using helm chart or you can install it manually.
 
 ### Installing via Helm Chart
+```helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr```<br>
 To install the chart, you need to set some required parameters - see below. <br>
 Here a list of common parameters when installing the chart:
 
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
 | | namespace | The namespace where *k8s-scr-mrg* is going to be installed.<br>**Default**: default | No |
-| set | k8sScrMgr.viya_namespace | The namespace where Viya is installed.<br>**Default**: viya | No |
+| set | k8sScrMgr.viyaNamespace | The namespace where Viya is installed.<br>**Default**: viya | No |
 | set | k8sScrMgr.host | The external URL where *k8s-scr-mrg* is going to be installed. | Yes |
-| set-file | k8sScrMgr.kubeconfig | Fully qualified file name for the kubectl config file | Yes |
-| set | scr[0].dockerCredentials.baseRepoURL | The container registry location (URI) | Yes |
-| set | scr[0].dockerCredentials.registryId | The container registry user ID | Yes |
-| set-string | scr[0].dockerCredentials.registryPassword | The container registry password | Yes |
+| set-file | k8sScrMgr.kubeconfig | Fully qualified file name for the kubectl config file. | Yes |
+| set | scr[0].publishingDestination | The SAS Viya Publishing Destination name for which you configure *k8s-scr-mrg*. | Yes | 
+| set | scr[0].dockerCredentials.baseRepoURL | The container registry location (URI). | Yes |
+| set | scr[0].dockerCredentials.registryId | The container registry user ID. | Yes |
+| set-string | scr[0].dockerCredentials.registryPassword | The container registry password. | Yes |
 | set-string | scr[0].dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
-| set | scr[0].namespace | Namespace where to load the SCR container.<br>**Default** scr (only for namespace[0]) | No |
+| set | scr[0].namespace | Namespace where to load the SCR container.<br>**Default**:scr (only for namespace[0]).<br>**Note**:For scr[1...] namespace is required! | No/Yes |
 
 Example to install the chart with the release name *k8s-scr-mrg*:
 
@@ -42,9 +44,10 @@ Example to install the chart with the release name *k8s-scr-mrg*:
 helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 --namespace k8sscrmgr \
 --create-namespace \
---set k8sScrMgr.viya_namespace=viya4 \
+--set k8sScrMgr.viyaNamespace=viya4 \
 --set k8sScrMgr.host=my-server.net.sas.com \
 --set-file k8sScrMgr.kubeconfig=$HOME/.kube/config \
+--set scr[0].publishingDestination=AzureDocker-PG \
 --set-string scr[0].dbCredentials="driver=sql;conopts=((driver=postgres;catalog=public;uid=mysas;pwd='asddsa';server= pg-demo-postgresql.default.svc.cluster.local;port=5431;DB=postgres;))" \
 --set scr[0].dockerCredentials.baseRepoURL=myregistry.azurecr.io \
 --set scr[0].dockerCredentials.registryId=myregistry \
