@@ -115,8 +115,9 @@ To import custom step *ID - K8S SCR Manager*:
 * Upload file [ID - K8S SCR Manager.step](./data/custom_step/ID%20-%20K8S%20SCR%20Manager.step) into the *custom steps* folder.
 
 ### Configure Custom Step
-Make sure the service URL for the customer step is correct. When you have installed *scr-k8s-mgr* via helm chart you can see the service URL at the end of the installation. 
+* **Service URL**: Make sure the service URL for the customer step is correct. When you have installed *scr-k8s-mgr* via helm chart you can see the service URL at the end of the installation. 
 Use this URL in the custom step. In SAS Studio open the step in edit mode. Go to tab *Options* and ensure that the service URL is correct. Save the step.
+* **Publishing Destinations**: To set the registered Publishing destinations, open the step in edit mode, highlight control dorp-down-list *Viya Publishing Destination* and set all publishing destinations you have registered with *k8s-scr-mrg*. Save the step.
 
 ---
 
@@ -124,8 +125,12 @@ Use this URL in the custom step. In SAS Studio open the step in edit mode. Go to
 #### Modus
 Use this section to choose the operation you want to perform:
 
+![](./images/modus.jpg)
+
+* **Viya Publishing Destination**<br>
+    Select the Viya Publishing Destination for which you want to run the operations.
 * **Pull Image**<br>
-    Load a new SCR image from the Docker registry into Kubernetes.
+    Load a SCR image from the Docker registry into Kubernetes.
 * **Restart** pod<br>
     Restart a pod, typically after publishing a new version of an SCR image.
 * **Delete deployment**<br>
@@ -134,10 +139,16 @@ Use this section to choose the operation you want to perform:
     Retrieve a list of pods in the *scr-pull* namespace, including status and age information.
 * **Get log**<br>
     Retrive the log for a container in the dedicated namespace.
+* **Get MAS log**<br>
+    Retrive the log information from MAS.
+
+---
+
+#### Pull image
+Load a SCR image from the Docker registry into Kubernetes.
 
 ![](./images/pull-image.jpg)
 
-#### Pull image
 * **Container Image Name**<br>
 The name of the SCR container image in the Docker registry
 * **Container Image Tag**<br>
@@ -153,8 +164,13 @@ Options:
     The Kubelet will only pull the image if it is not already present on the node. If a local copy exists, it will be used without checking the registry for updates
     * Never<br>
     It will only use a locally available image. If the image is not found locally, the container launch will fail. This policy is typically used for development or air-gapped environments where images are pre-loaded onto nodes
-* **SCR is using database**
-    * Tick this box if the SCR image is accessing a database. If this box is ticked a database secret needs to be set. [See Create Database Secret](#2-create-database-secret).    
+* **Pull Options**
+    * **Deployment Name**<br>
+        By default the SCR image name is used as deployment name. You can set a different deployment name, for example if you want to load different versions of the same image.
+    * **SCR Endpoint**<br>
+        By default the SCR endpoint is the same as the deployment name. E.g., if the image name is abc the endpoint is myServer.com/abc.<br>You can change the default endpoint. For example if you load two images with the same name into two different namespaces you have to use  different endpoints.
+* **SCR Log Level Settings**<br>
+    In this section you find a list of all available SCR loggers, that you can set with their appropriate log level.
 * **Environment Variables**<br>
 Set the number of environment variables you want to set for the scr container
 * **Environment Variable**<br>
@@ -163,8 +179,13 @@ Set the number of environment variables you want to set for the scr container
     * **Value**<br>
     Environment variable value
 
->❗**Note:** The deployment and pod created in Kubernetes are prefixed with **scr-** followed by the image name.<br>
-**Example:** For an image named *my-id-flow*, the deployment and pod will be named *scr-my-id-flow*.
+>❗**Note:** When you have loaded a SCR container, you will get a list of all *loggers* and *environment variables* that have been set.
+
+<details>
+<summary>Load SCR image</summary>
+
+![](./images/k8s-scr-mgr-scrpull01.gif)
+</details>
 
 ---
 #### Restart pod
