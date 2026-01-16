@@ -205,27 +205,6 @@ Set the number of environment variables you want to set for the scr container
     </details>
 </details>
 
-<details>
-<summary>Install kubectl on Windows</summary>
-
-* Download the *kubectl* binary:
-    * Go to the [Kubernetes releases page](https://kubernetes.io/releases/download/).
-    * Locate the latest stable release for Windows
-    * Download the *kubectl.exe* file.
-
-    <details>
-    <summary>Download correct kubectl.exe</summary>
-
-    If you are not sure which *kubectl.exe* to download (386, amd64, arm64), check your Windows architecture:
-
-    * Press **Windows Key + R**, type *msinfo32*, and hit **Enter**.
-    * Look for *System Type*:
-        * If it says **x64-based PC**, you need **amd64**.
-        * If it says **ARM-based PC**, you need **arm64**.
-        * If it says **x86-based PC**, you need **386**.
-    </details>  
-
-
 ---
 
 #### Restart pod
