@@ -15,6 +15,7 @@ data:
         RESTART_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.restart_scr }}
         DELETE_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.delete_scr }}
         GETLOG_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.getlog_scr }}
+        GETINFO_SCR= {{ ternary "True" "False" .Values.k8sScrMgr.getinfo_scr }}
         GETLOG_MAS= {{ ternary "True" "False" .Values.k8sScrMgr.getlog_mas }}
         ##################################################
         # Below are settings to map namespaces to container registries

@@ -27,19 +27,9 @@ rules:
   - apiGroups: [""]
     resources: ["pods", "services", "pods/log"]
     verbs: ["get", "list", "watch", "update", "patch", "delete"]
-metadata:
-  name: {{ $.Release.Name }}-role
-  namespace: {{ $ns | quote }} # namespace where SCRs are deployed
-rules:
-  - apiGroups: ["apps"]
-    resources: ["deployments", "replicasets"]
-    verbs: ["get", "list", "watch", "update", "patch", "delete"]
-  - apiGroups: [""]
-    resources: ["pods", "services", "pods/log"]
-    verbs: ["get", "list", "watch", "update", "patch", "delete"]
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses"]
-    verbs: ["delete"]
+    verbs: ["delete", "get", "list", "watch", "create", "update", "patch"]
 
 ---
 

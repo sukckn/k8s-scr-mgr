@@ -14,6 +14,7 @@
 # <DB-SECRET-MOUNT>:   Volume mount for database secrets
 # <DB-SECRET-VOLUME>:  Volume for database secrets
 # <DOCKER-PULL-SECRET>: Docker pull secret name
+# <REPLICAS>          : Number of replicas for the deployment
 #################################################################################################
 apiVersion: apps/v1
 kind: Deployment
@@ -24,10 +25,9 @@ metadata:
     app-owner: <APP-OWNER>
     app.kubernetes.io/name: <PREFIX><SCR-NAME>
 spec:
-  replicas: 1
+  replicas: <REPLICAS>
   selector:
     matchLabels:
-      app-owner: <APP-OWNER>
       app.kubernetes.io/name: <PREFIX><SCR-NAME>
   template:
     metadata:
@@ -45,9 +45,6 @@ spec:
           protocol: TCP
         volumeMounts:
 <DB-SECRET-MOUNT>
-        env:
-        - name: "Dummy-Env"
-          value: "Info"
 <ENV-VARS>          
         securityContext:
           capabilities:

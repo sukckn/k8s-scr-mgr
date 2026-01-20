@@ -77,6 +77,9 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         if not SCR_ENDPOINT:
             SCR_ENDPOINT= SCR_NAME   
 
+        # get number of replicas. Default is 1
+        REPLICAS= str(inputData.get('replicas', 1))
+
         # the container image tag in the registry
         SCR_TAG= inputData.get('scr_tag')
         if not SCR_TAG:
@@ -133,7 +136,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             cont_prefix= cont_prefix + '-'
 
         # Prepare the environment variables for the yaml file
-        env= ''
+        env= '        env:\n'
         ENV_VARS= inputData.get('env_vars')
         if ENV_VARS:
             for v in ENV_VARS:
@@ -167,6 +170,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         yaml_content= yaml_content.replace('<DB-SECRET-VOLUME>', db_secret_volume)
         yaml_content= yaml_content.replace('<SCR-ENDPOINT>', SCR_ENDPOINT)
         yaml_content= yaml_content.replace('<DOCKER-PULL-SECRET>', docker_pull_secret)
+        yaml_content= yaml_content.replace('<REPLICAS>', REPLICAS)
 
         # Write the modified content to a new yaml file
         yaml_file= f'./yaml/scr-{SCR_NAME}.yaml'
@@ -192,7 +196,8 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         # Return a response
         return jsonify({
             'message': msg,
-            'url': f'https://{host}/{SCR_ENDPOINT}'
+            'url': f'https://{host}/{SCR_ENDPOINT}',
+            'url_internal': f'http://{SCR_NAME}.{namespace}.svc.cluster.local/{SCR_ENDPOINT}'
                     }), 200
 
 ##########################################################################################
@@ -253,9 +258,8 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         endpoint_available= current_app.config.get('LIST_SCR', False)
         if not endpoint_available:
             return jsonify({'error': 'Endpoint "/list-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
-################
+
         inputData= request.args
-################
         # get namespace from publishing destination
         namespace, msg= pub_dest(inputData, 'namespace')
         if msg:
@@ -513,6 +517,212 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             'ns': namespace,    
             'pod_name': podname
             }), 200
+
+##########################################################################################
+    @bp.route('/getinfo-scr', methods=['POST'])
+    def getinfo_scr():
+        endpoint_available= current_app.config.get('GETINFO_SCR', False)
+        if not endpoint_available:
+            return jsonify({'error': 'Endpoint "/getinfo-scr" not available - Check k8s-scr-mgr config settings if endpoint is switched on.'}), 404
+
+        # Get JSON data from the request
+        inputData= request.get_json()
+
+        # set http status code
+        status= 200
+
+        # get input parameters
+        DEPLOYMENT_NAME= inputData.get('deployment_name')
+        if not DEPLOYMENT_NAME:
+            status= 400
+            return jsonify({'error': 'Error: Parameter >deployment_name< is required'}), status
+
+        # get namespace from publishing destination
+        namespace, msg= pub_dest(inputData, 'namespace')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
+
+        ##############################################################################################################################
+        # Define the command to get environment information
+        command= f"kubectl get deployment {DEPLOYMENT_NAME} -n {namespace} " + "-o jsonpath={.spec.template.spec.containers[*].env}"
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)            
+            env_vars= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response        
+            msg= f'Error get environment variables: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            return jsonify({'error': f'Error get environment variables: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error getting environment information: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+
+        ##############################################################################################################################
+        # Define the command to get host from ingress
+        command= f"kubectl get ingress {DEPLOYMENT_NAME} -n {namespace} " + "-o jsonpath={.spec.rules[*].host}"        
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)
+            host= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            msg= f'Error get host from ingress: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            return jsonify({'error': f'Error get host from ingress: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error getting host from ingress: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+
+        ##############################################################################################################################
+        # Define the command to get path from ingress
+        command= f"kubectl get ingress {DEPLOYMENT_NAME} -n {namespace} " + "-o jsonpath={.spec.rules[0].http.paths[0].path}"        
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)
+            path= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            msg= f'Error get path from ingress: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            return jsonify({'error': f'Error get path from ingress: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error getting path from ingress: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+
+        ##############################################################################################################################
+        # Define the command to get number of replicas from deployment
+        command= f"kubectl get deployment {DEPLOYMENT_NAME} -n {namespace} " + "-o jsonpath={.spec.replicas}"        
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)
+            replicas= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            msg= f'Error get replicas from deployment: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            return jsonify({'error': f'Error get replicas from deployment: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error getting replicas from deployment: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+
+        ##############################################################################################################################
+        # Define the command to get app-owner from deployment
+        command= f"kubectl get deployment {DEPLOYMENT_NAME} -n {namespace} " + "-o jsonpath={.metadata.labels.app-owner}"        
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)
+            app_owner= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            msg= f'Error get app-owner from deployment: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            return jsonify({'error': f'Error get app-owner from deployment: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error getting app-owner from deployment: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+
+        ##############################################################################################################################
+        # Define the command to get image info from deployment
+        command= f"kubectl get deployment {DEPLOYMENT_NAME} -n {namespace} " + "-o jsonpath={.spec.template.spec.containers[*].image}"        
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)
+            image_info= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            msg= f'Error get image info from deployment: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            return jsonify({'error': f'Error get image info from deployment: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error getting image info from deployment: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+
+        # extract tag from image info
+        if ':' in image_info:
+            tag= image_info.split(':')[-1]
+        else:
+            tag= 'latest'
+
+        # extract container registry from image info
+        if '/' in image_info:
+            container_registry= '/'.join(image_info.split('/')[:-1])
+        else:
+            container_registry= 'Did not find container registry in image info'
+        
+        # extract image name from image info
+        image_name= image_info.split('/')[-1].split(':')[0]
+        if not image_name:
+            image_name= 'Did not find image name in image info'
+
+         ##############################################################################################################################
+        # Define the command to get imagePullPolicy from deployment
+        command= f"kubectl get deployment {DEPLOYMENT_NAME} -n {namespace} " + "-o jsonpath={.spec.template.spec.containers[*].imagePullPolicy}"        
+        try:
+            # Run the command
+            result= subprocess.run(command, shell=True, capture_output=True, text=True)
+            imagePullPolicy= result.stdout
+        except subprocess.CalledProcessError as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            msg= f'Error get imagePullPolicy info from deployment: {e.stderr.strip()}'
+            return jsonify({"error": msg, 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        except Exception as e:
+            status= 424 # Failed Dependency
+            # Return an error response
+            return jsonify({'error': f'Error get imagePullPolicy info from deployment: {e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+        if len(result.stderr) > 0:
+            status= 400 # Failed Dependency
+            msg= f'Error getting imagePullPolicy info from deployment: {result.stderr}'
+            return jsonify({'error': f'{msg}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
+
+       ##############################################################################################################################
+        # Return result as JSON
+        return jsonify({
+            'env_vars': env_vars,
+            'replicas': replicas,
+            'app_owner': app_owner,
+            'image_name': image_name,
+            'container_registry': container_registry,
+            'tag': tag,
+            'imagePullPolicy': imagePullPolicy,
+            'url': f'https://{host}{path}',
+            'url_internal': f'http://{DEPLOYMENT_NAME}.{namespace}.svc.cluster.local{path}',
+            'ns': namespace,
+            'deployment_name': DEPLOYMENT_NAME
+        }), 200
+
 
 ##########################################################################################
     @bp.route('/getlog-mas', methods=['POST'])

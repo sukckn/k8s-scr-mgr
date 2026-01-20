@@ -9,6 +9,7 @@ class Config:
     DELETE_SCR= True
     GETLOG_SCR= True
     GETLOG_MAS= True
+    GETINFO_SCR= True
     PUBLISHING_DESTINATIONS= {
         'AzureDocker-PG': {
             'namespace': 'scr',

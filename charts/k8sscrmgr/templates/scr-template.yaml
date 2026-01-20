@@ -16,10 +16,9 @@ data:
         app-owner: <APP-OWNER>
         app.kubernetes.io/name: <PREFIX><SCR-NAME>
     spec:
-      replicas: 1
+      replicas: <REPLICAS>
       selector:
         matchLabels:
-          app-owner: <APP-OWNER>
           app.kubernetes.io/name: <PREFIX><SCR-NAME>
       template:
         metadata:
@@ -37,9 +36,6 @@ data:
               protocol: TCP
             volumeMounts:
     <DB-SECRET-MOUNT>
-            env:
-            - name: "Dummy-Env"
-              value: "Info"
     <ENV-VARS>          
             securityContext:
               capabilities:
