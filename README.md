@@ -67,6 +67,7 @@ helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 | set | k8sScrMgr.restart_scr | Enables the /restart-scr endpoint to restart pods.<br>**Default:** True | No |
 | set | k8sScrMgr.delete_scr | Enables the /delete-scr endpoint to delete pods and deployments.<br>**Default:** True | No |
 | set | k8sScrMgr.getlog_scr | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>**Default:** True | No |
+| set | k8sScrMgr.getinfo_scr | Enables the /getinfo-scr endpoint to receive SCR deploment information.<br>**Default:** True | No |
 | set | k8sScrMgr.getlog_mas | Enables the /getlog-mas endpoint to receive the log for MAS.<br>**Default:** True | No |
 | set-file | k8sScrMgr.scr_yaml_template | Fully qualified file name for the scr yaml file to load the SCR container. See [Yaml file to load SCR Container](#yaml-file-to-load-scr-container) for more information.<br>**Default:** If not used the default SCR yaml template is used. | No |
 </details>
@@ -310,5 +311,3 @@ Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL``
 %let k8s_scr_mgr_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
 
 ```
-
-
