@@ -11,6 +11,7 @@ Once deployed, the `k8s-scr-mgr` container provides a service accessible via cus
 🔷 **Delete** SCR container deployments<br>
 🔷 **List** all pods running in the dedicated Kubernetes namespace<br>
 🔷 **Show** log for SCR container<br>
+🔷 **Show** SCR Kubernetes deployment information<br>
 🔷 **Show MAS** log for information<br>
 
 > ⚠️ For security reasons, all SCR containers are loaded into **dedicated namespaces**. The default namespace is *scr*. You can overwrite the default namespace when installing *k8s-scr-mgr*.
@@ -104,6 +105,7 @@ The **ID - K8S SCR Manager** custom step allows you to interact with the k8s-scr
 🔷 **Delete** SCR container deployments<br>
 🔷 **List** all pods running in the dedicated Kubernetes namespace<br>
 🔷 **Show** log for SCR container<br>
+🔷 **Show** SCR Kubernetes deployment information<br>
 🔷 **Show MAS** log for information<br>
 
 ---
@@ -137,10 +139,12 @@ Use this section to choose the operation you want to perform:
     Remove an SCR deployment from Kubernetes.
 * **Get list of pods in namespace**<br>
     Retrieve a list of pods in the *scr-pull* namespace, including status and age information.
+* **Get SCR Info**<br>
+    Retrieve SCR deployment information including currently set environment variables.
 * **Get log**<br>
-    Retrive the log for a container in the dedicated namespace.
+    Retrieve the log for a container in the dedicated namespace.
 * **Get MAS log**<br>
-    Retrive the log information from MAS.
+    Retrieve the log information from MAS.
 
 ---
 
@@ -153,13 +157,6 @@ Load a SCR image from the Docker registry into Kubernetes.
 The name of the SCR container image in the Docker registry
 * **Container Image Tag**<br>
 The tag name of the image you want to load. E.g.: latest or 6
-* **Owner**<br>
-Set a Kubernetes lable for the owner of the scr image. Information who to contact by question about the image. 
-    * Max 63 characters.
-    * Lowercase / uppercase letters: A–Z a–z
-    * Numbers: 0–9
-    * Special characters: - _ .
-    * Start and end with an alphanumeric character.
 * **Image Pull Policy**,br
 Set how the image should get pulled if the pod gets restarted.<br>
 Options:
@@ -169,6 +166,17 @@ Options:
     The Kubelet will only pull the image if it is not already present on the node. If a local copy exists, it will be used without checking the registry for updates
     * Never<br>
     It will only use a locally available image. If the image is not found locally, the container launch will fail. This policy is typically used for development or air-gapped environments where images are pre-loaded onto nodes
+* **Replicas**<br>
+Set the number of pods to start. 
+* **Owner**<br>
+Set a Kubernetes lable for the owner of the scr image. Information who to contact about the image. 
+    * Max 63 characters.
+    * Lowercase / uppercase letters: A–Z a–z
+    * Numbers: 0–9
+    * Special characters: - _ .
+    * Start and end with an alphanumeric character.
+
+    >❗**Note**: If not set the SAS Studio Client ID will be used.
 * **Pull Options**
     * **Deployment Name**<br>
         By default the SCR image name is used as deployment name. You can set a different deployment name, for example if you want to load different versions of the same image.
@@ -233,7 +241,7 @@ Run the step to receive a list of all pods running in the namespace linked to k8
 ![](./images/get-log.jpg)
 
 * **Pod name**<br>
-The name of the pod for wich you want the log information.<br>
+The name of the pod for which you want the log information.<br>
 You don't need to type in the complete pod name, portion of it will work. E.g.: if the pod name is 'scr-mypod-7b7c55d84b-2fm87' you can just type 'mypod'.
 
 * **Show rows in log**
@@ -244,6 +252,29 @@ This indicates how many rows from the log will be shown.
     Show the top number of rows as set in field **Number of rows**
     * Bottom rows<br>
     Show last number of rows as set in field **Number of rows**
+
+---
+
+#### Get SCR Info
+![](./images/get-scr-info.jpg)
+
+* **Deployment name**<br>
+The name of the deployment for which you want retieve information.<br>
+Following information will be shown:
+    * Deployment Name
+    * Namespace
+    * App-Owner
+    * SCR Image Name
+    * SCR Image Tag
+    * Container Registry
+    * Image Pull Policy
+    * Replicas
+    * Internal SCR URL
+    * External SCR URL
+    * List of currently set environment variables
+    * List of SCR Loggers currently set
+
+---
 
 #### Get MAS log
 ![](./images/get-MAS-log.jpg)

@@ -35,7 +35,8 @@ Download file [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) and edit it
 | RESTART_SCR | Enables the /restart-scr endpoint to restart pods.<br>***Default:*** True |
 | DELETE_SCR | Enables the /delete-scr endpoint to delete pods and deployments.<br>***Default:*** True |
 | GETLOG_SCR | Enables the /getlog-scr endpoint to receive the log for a scr container.<br>***Default:*** True |
-| GETLO G_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** True |
+| GET_INFO_SCR | Enables the /getinfo-scr endpoint to receive scr deployment information.<br>***Default:*** True |
+| GETLOG_MAS | Enables the /getlog-mas endpoint to receive the log for MAS.<br>***Default:*** True |
 | PUBLISHING_DESTINATIONS | Maping for Viya publishing destination. See [k8s-scr-mgr.config](./data/config/k8s-scr-mgr.config) for details. |
 
 Copy the following file into directory ```~/k8s-scr-mgr```
