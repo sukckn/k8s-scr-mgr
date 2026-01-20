@@ -36,7 +36,7 @@ Here a list of common parameters when installing the chart:
 | set | scr[0].dockerCredentials.baseRepoURL | The container registry location (URI). | Yes |
 | set | scr[0].dockerCredentials.registryId | The container registry user ID. | Yes |
 | set-string | scr[0].dockerCredentials.registryPassword | The container registry password. | Yes |
-| set-string | scr[0].dbCredentials.connectionstring | Database connection string. Use the same string that is used in Viya Environment manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
+| set-string | scr[0].dbCredentials | Database connection string. Use the same string that is used in Viya Environment Manager to connect from MAS.<br>**Note**: Enclose connection string in double quotes! | No |
 | set | scr[0].namespace | Namespace where to load the SCR container.<br>**Default**:scr (only for namespace[0]).<br>**Note**:For scr[1...] namespace is required! | No/Yes |
 
 Example to install the chart with the release name *k8s-scr-mrg*:
@@ -75,16 +75,17 @@ helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 > :bulb: **Tip**: See annotation *helm.sh/uninstall* in Kubernetes deployment for helm uninstall command.
 
 #### Configure for more than one Viya Publishing Destination
-If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from a specific publishing destination. Each container registry (publishing destination) will have its own dedicated namespace and database connection details. 
+If you publish to different container registries and therefore have more than one Docker publishing destination in Viya, you can configure *k8s-scr-mgr* to pull from different publishing destinations. 
 
-For each container registry (publishing destination) you need to set:
-* namespace
-* dbCredentials
-* dockerCredentials.baseRepoURL
-* dockerCredentials.registryId
-* dockerCredentials.registryPassword
+For each publishing destination you need to set:
+* scr[x].publishingDestination
+* scr[x].namespace
+* scr[x].dockerCredentials.baseRepoURL
+* scr[x].dockerCredentials.registryId
+* scr[x].dockerCredentials.registryPassword
+* scr[x].dbCredentials (optional)
 
-The parameters are in section *scr* and will be called like *scr[x].namespace* where *x* is the number of the container registry you want to register. The first container registry starts with 0 and is compulsory.
+The *x* in *scr[x]* identifies the number of the container registry you want to register. Use continues numbers. The first container registry starts with 0 and is compulsory.
 
 #### Yaml file to load SCR Container
 By default, a yaml file template is used to load the SCR container into Kubernetes. You can overwrite the default template to adjust Kubernetes settings when loading a SCR container.
@@ -120,7 +121,7 @@ To import custom step *ID - K8S SCR Manager*:
 ### Configure Custom Step
 * **Service URL**: Make sure the service URL for the customer step is correct. When you have installed *scr-k8s-mgr* via helm chart you can see the service URL at the end of the installation. 
 Use this URL in the custom step. In SAS Studio open the step in edit mode. Go to tab *Options* and ensure that the service URL is correct. Save the step.
-* **Publishing Destinations**: To set the registered Publishing destinations, open the step in edit mode, highlight control dorp-down-list *Viya Publishing Destination* and set all publishing destinations you have registered with *k8s-scr-mrg*. Save the step.
+* **Publishing Destinations**: To set the registered Publishing destinations, open the step in edit mode, highlight control drop-down-list *Viya Publishing Destination* and set all publishing destinations you have registered with *k8s-scr-mrg*. Save the step.
 
 ---
 
@@ -170,7 +171,7 @@ Options:
 * **Replicas**<br>
 Set the number of pods to start. 
 * **Owner**<br>
-Set a Kubernetes lable for the owner of the scr image. Information who to contact about the image. 
+Set a Kubernetes label for the owner of the scr image. Information who to contact about the image. 
     * Max 63 characters.
     * Lowercase / uppercase letters: A–Z a–z
     * Numbers: 0–9
@@ -182,7 +183,7 @@ Set a Kubernetes lable for the owner of the scr image. Information who to contac
     * **Deployment Name**<br>
         By default the SCR image name is used as deployment name. You can set a different deployment name, for example if you want to load different versions of the same image.
     * **SCR Endpoint**<br>
-        By default the SCR endpoint is the same as the deployment name. E.g., if the image name is abc the endpoint is myServer.com/abc.<br>You can change the default endpoint. For example if you load two images with the same name into two different namespaces you have to use  different endpoints.
+        By default the SCR endpoint is the same as the deployment name. E.g., if the image name is abc the endpoint is myServer.com/abc.<br>You can change the default endpoint. For example, if you load two images with the same name into two different namespaces you have to use different endpoints.
 * **SCR Log Level Settings**<br>
     In this section you find a list of all available SCR loggers, that you can set with their appropriate log level.
 * **Environment Variables**<br>
@@ -260,7 +261,7 @@ This indicates how many rows from the log will be shown.
 ![](./images/get-scr-info.jpg)
 
 * **Deployment name**<br>
-The name of the deployment for which you want retieve information.<br>
+The name of the deployment for which you want retrieve information.<br>
 Following information will be shown:
     * Deployment Name
     * Namespace
