@@ -196,7 +196,7 @@ Set the number of environment variables you want to set for the scr container
 
 >❗**Note:** When you have loaded a SCR container, you will get a list of all *loggers* and *environment variables* that have been set.
 
->❗**Note:** You can change the loggers and environment variables by running *Pull image* again. When doing this you have to use the same value for *Owner* as you have used when you deployed it the first time. 
+>💡**Tip:** To change SCR loggers and environment variables run *Pull image* again on an existing SCR deployment. Run *Get SCR Info* first to check the current settings of the SCR deploment before applying changes.
 
 <details><summary>Load SCR image</summary>
 
