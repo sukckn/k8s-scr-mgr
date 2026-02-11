@@ -1,7 +1,7 @@
 ![k8s-scr-mgr logo](./images/k8s-scr-mgr_rm.png)
 
 # `k8s-scr-mgr`: Service Utility for SAS Container Runtime (SCR)
-`K8S SCR Manager` is a utility service designed to load and manage SAS Container Runtime (SCR) images within a Kubernetes cluster. It is designed to support SAS Viya development teams publishing decision flows or models as SCR. The service simplifies loading SCR images into Kubernets particularly in environments where developers do not have direct access or permissions to interact with the Kubernetes cluster.
+`K8S SCR Manager` is a utility service designed to load and manage SCR images within a Kubernetes cluster. It is designed to support Viya development teams publishing decision flows or models as SCR. The service simplifies loading SCR images into Kubernetes particularly in environments where developers do not have direct access or permissions to interact with the Kubernetes cluster.
 
 ## Features
 Once deployed, the `k8s-scr-mgr` container provides a service accessible via custom step *ID - K8S SCR Manager* in SAS Studio to:
@@ -313,4 +313,5 @@ Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL``
 
 
 ```
+
 
