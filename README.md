@@ -1,7 +1,7 @@
 ![k8s-scr-mgr logo](./images/k8s-scr-mgr_rm.png)
 
 # `k8s-scr-mgr`: Service Container for SAS Viya SCR
-`k8s-scr-mgr` is a service container designed to support developers working with SAS Viya by enabling the loading of SAS Container Runtime (SCR) images into Kubernetes. This tool is especially useful during the development phase when decision flows or models are published to a Docker Registry, but developers may not have direct access to the Kubernetes cluster.
+`k8s scr mgr` is a utility service designed to load and manage SAS Container Runtime (SCR) images within a Kubernetes cluster. It is designed to support development teams working with SAS Viya, particularly in environments where developers do not have direct access or permissions to interact with the Kubernetes cluster.
 
 ## Features
 Once deployed, the `k8s-scr-mgr` container provides a service accessible via custom step *ID - K8S SCR Manager* in SAS Studio to:
@@ -310,5 +310,6 @@ If *k8s-scr-mgr* is not deployed to namespace ```default```, update the URL usin
 Alternatively, you can set the Service URL by setting macro ```K8S_SCR_MGR_URL```. This could be done in the *SAS Studio Autoexec file*, to automatically set the URL every time you start *SAS Studio*.:
 ```
 %let k8s_scr_mgr_url= %nrquote(k8s-scr-mgr.mynamespace.svc.cluster.local);
+
 
 ```
