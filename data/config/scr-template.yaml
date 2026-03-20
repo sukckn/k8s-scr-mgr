@@ -45,7 +45,9 @@ spec:
           protocol: TCP
         volumeMounts:
 <DB-SECRET-MOUNT>
-<ENV-VARS>          
+<ENV-VARS>
+        - name: "SAS_SCR_APP_PATH"
+          value: "<SCR-ENDPOINT>"
         securityContext:
           capabilities:
             drop:
