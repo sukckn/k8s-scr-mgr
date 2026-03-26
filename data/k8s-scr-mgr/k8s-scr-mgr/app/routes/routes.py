@@ -7,7 +7,7 @@ import base64
 ##########################################################################################
 def pub_dest(inputData, lookup):
     msg= ''
-    # get settings for publishing destinations from config mapping
+    # get all registered publishing destinations from config mapping
     PUBLISHING_DESTINATIONS= current_app.config.get('PUBLISHING_DESTINATIONS', {})
     if not PUBLISHING_DESTINATIONS:
         msg= 'Error: No publishing destinations found in k8s-scr-mgr config.'
@@ -17,8 +17,8 @@ def pub_dest(inputData, lookup):
     pub_dest_name= inputData.get('pub_dest_name')
     if not pub_dest_name:
         pub_dest_name= list(PUBLISHING_DESTINATIONS.keys())[0]
-    pub_dest_name= pub_dest_name.lower()
-
+    
+    # if asked for the publishing destination name, we return it here and do not check if it is in the config mapping as it is only used for informational purposes in this case
     if lookup == 'pub_dest_name':
         return pub_dest_name, msg   
 
@@ -26,11 +26,17 @@ def pub_dest(inputData, lookup):
         msg= f'Error: Publishing destination >{pub_dest_name}< not found in k8s-scr-mgr config.\nAvailable Publishing Destinations: {list(PUBLISHING_DESTINATIONS.keys())}'
         return None, msg
 
-    # get namespace, registry or setDbSecret from publishing destination
+    # get namespace, registry or setDbSecret from publishing destination.
+    # for setDbSecret we also convert the string value to boolean. If the value is empty, we return an error message as this parameter is required for the SCR deployment.
     lookup_value= PUBLISHING_DESTINATIONS[pub_dest_name].get(lookup, '')
-    if len(lookup_value) == 0:
-        msg= f'Error: Parameter >{lookup}< not set for publishing destination >{pub_dest_name}<'
-        return None, msg
+    if isinstance(lookup_value, str) :
+        if lookup_value == 'False':
+            lookup_value= False
+        elif lookup_value == 'True':
+            lookup_value= True
+        elif len(lookup_value) == 0:
+            msg= f'Error: Parameter >{lookup}< not set for publishing destination >{pub_dest_name}<'
+            return None, msg
 
     return lookup_value, msg
 
@@ -191,14 +197,18 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             return jsonify({'error': f'{e}'}), status
         
         msg= f'\n{result.stdout}'
+        url= f'https://{host}/{SCR_ENDPOINT}'
+        url_internal= f'http://{SCR_NAME}.{namespace}.svc.cluster.local/{SCR_ENDPOINT}'
         if len(result.stderr) > 0:
             msg= f'Error: {result.stderr}'
+            url= ''
+            url_internal= ''
         # Return a response
         return jsonify({
             'message': msg,
-            'url': f'https://{host}/{SCR_ENDPOINT}',
-            'url_internal': f'http://{SCR_NAME}.{namespace}.svc.cluster.local/{SCR_ENDPOINT}'
-                    }), 200
+            'url': url,
+            'url_internal': url_internal
+        }), 200
 
 ##########################################################################################
     @bp.route('/restart-scr', methods=['POST'])
@@ -244,13 +254,15 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             return jsonify({'error': f'{e}', 'ns': namespace, 'deployment_name': DEPLOYMENT_NAME}), status
 
         msg= f'\n{result.stdout}'
+        url= f'https://{host}/{DEPLOYMENT_NAME}'
         if len(result.stderr) > 0:
             msg= f'Error: {result.stderr}'
+            url= ''
         # Return a response
         return jsonify({
             'message': msg,
-            'url': f'https://{host}/{DEPLOYMENT_NAME}'
-                    }), 200
+            'url': url
+        }), 200
 
 ##########################################################################################
     @bp.route('/list-scr', methods=['GET'])

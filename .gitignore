@@ -2,3 +2,6 @@
 venv/
 # Ignore git environment folder
 .git/
+# Ignore Python bytecode files
+__pycache__/
+*.pyc
