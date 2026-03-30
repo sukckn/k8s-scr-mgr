@@ -12,11 +12,15 @@ def pub_dest(inputData, lookup):
     if not PUBLISHING_DESTINATIONS:
         msg= 'Error: No publishing destinations found in k8s-scr-mgr config.'
         return None, msg
+    # we make all publishing destinations in the dictionatry lower case as we look them up not case sensetive
+    PUBLISHING_DESTINATIONS= {k.lower(): v for k, v in PUBLISHING_DESTINATIONS.items()}
 
     # get publishing destination from input parameters. If not provided, use the first one from the config mapping
     pub_dest_name= inputData.get('pub_dest_name')
     if not pub_dest_name:
         pub_dest_name= list(PUBLISHING_DESTINATIONS.keys())[0]
+    # we make lookup lower case as it is lower case in PUBLISHING_DESTINATIONS. See above!
+    pub_dest_name= pub_dest_name.lower() 
     
     # if asked for the publishing destination name, we return it here and do not check if it is in the config mapping as it is only used for informational purposes in this case
     if lookup == 'pub_dest_name':

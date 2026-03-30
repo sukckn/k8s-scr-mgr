@@ -27,7 +27,7 @@ data:
 {{- $dbSecret := "False" -}}
 {{- $list := .Values.scr | default (list) -}}
 {{- range $i, $item := $list }}
-  {{- /* Determine publishing destination */}}
+  {{- /* Determine publishing destination and make it in lower case - when we look it up in k8sScrMgr service we look for it in lower case*/}}
   {{- $publishingDestination := (required (printf "'scr[%d].publishingDestination': --set scr[%d].publishingDestination=<viya publishing destination>" $i $i) $item.publishingDestination) | lower -}}
 
   {{- /* Safely dig nested values and normalize types */}}
