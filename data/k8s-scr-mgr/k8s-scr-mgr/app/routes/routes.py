@@ -73,7 +73,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         if not IMAGE_NAME:
             status= 400
             return jsonify({'error': 'Error: Parameter >image_name< is required'}), status
-        IMAGE_NAME= IMAGE_NAME.lower() # Kubernetes image names must be lowercase
+        IMAGE_NAME= IMAGE_NAME.lower() # docker image names must be lowercase
 
         # get deployment name. If not provided, derive from image name
         SCR_NAME= inputData.get('deployment_name')
@@ -202,7 +202,7 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         
         msg= f'\n{result.stdout}'
         url= f'https://{host}/{SCR_ENDPOINT}'
-        url_internal= f'http://{SCR_NAME}.{namespace}.svc.cluster.local/{SCR_ENDPOINT}'
+        url_internal= f'http://{cont_prefix}{SCR_NAME}.{namespace}.svc.cluster.local/{SCR_ENDPOINT}'
         if len(result.stderr) > 0:
             msg= f'Error: {result.stderr}'
             url= ''
