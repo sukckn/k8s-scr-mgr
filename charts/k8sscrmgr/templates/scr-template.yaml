@@ -36,6 +36,7 @@ data:
               protocol: TCP
             volumeMounts:
     <DB-SECRET-MOUNT>
+    <DB-CONFIG-MOUNT>
     <ENV-VARS>          
             securityContext:
               capabilities:
@@ -51,6 +52,7 @@ data:
           - name: <DOCKER-PULL-SECRET>
           volumes:
     <DB-SECRET-VOLUME>
+    <DB-CONFIG-VOLUME>
     ---
     apiVersion: v1
     kind: Service

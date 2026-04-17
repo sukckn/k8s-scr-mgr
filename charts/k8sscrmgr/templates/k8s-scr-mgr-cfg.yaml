@@ -49,9 +49,16 @@ data:
   {{ end }} 
   {{- $setDbSecret := $dbSecret -}}
 
+  {{- $connectionCheckStatement := "False" -}}
+  {{- if $item.setConnCheckStmt }}
+      {{- $connectionCheckStatement = "True" -}}
+  {{ end }} 
+  {{- $setConnectionCheck := $connectionCheckStatement -}}
+
   {{- /* Compose the inner value and add it to the map */}}
-  {{- $val := dict "namespace" $namespace "registry" $containerRegistry "setDbSecret" $setDbSecret -}}
+  {{- $val := dict "namespace" $namespace "registry" $containerRegistry "setDbSecret" $setDbSecret "setConnCheckStmt" $setConnectionCheck -}}
   {{- $_ := set $dest $publishingDestination $val -}}
+
 {{- end }}
 
 {{- /* Pretty-print JSON and indent for YAML block scalar */ -}}

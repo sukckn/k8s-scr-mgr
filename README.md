@@ -60,6 +60,7 @@ helm install k8s-scr-mgr oci://ghcr.io/sukckn/k8sscrmgr \
 
 | | Parameter | Comment | Required |
 | --- | --- | --- | --- |
+| set-string | scr[x].setConnCheckStmt | A SQL statement to test the database connection. E.g.: For Oracle use: select 1 from dual. Check SAS Viya documentation for more information.<br>[x]: x stands for the number of the respective publishing destination  | No |
 | set | k8sScrMgr.container_prefix | The prefix will be added to the SCR image name. All created components in Kubernetes will have the prefix. E.g.: If prefix 'scr' is set and the SCR image is called 'abc' the created components in Kubernetes are named 'scr-abc'<br>**Default:** scr | No |
 | set | k8sScrMgr.mas_pod | The prefix name of the MAS pod.<br>**Default:** sas-microanalytic-score | No |
 | set | k8sScrMgr.list_scr | Enables the /list-scr endpoint to display pod statuses in the namespace.<br>**Default:** True | No |

@@ -30,8 +30,9 @@ def pub_dest(inputData, lookup):
         msg= f'Error: Publishing destination >{pub_dest_name}< not found in k8s-scr-mgr config.\nAvailable Publishing Destinations: {list(PUBLISHING_DESTINATIONS.keys())}'
         return None, msg
 
-    # get namespace, registry or setDbSecret from publishing destination.
+    # get namespace, registry setDbSecret or setConnCheckStmt from publishing destination.
     # for setDbSecret we also convert the string value to boolean. If the value is empty, we return an error message as this parameter is required for the SCR deployment.
+    # for setConnCheckStmt we also convert the string value to boolean. If the value is empty, we return an error message as this parameter is required for the SCR deployment.
     lookup_value= PUBLISHING_DESTINATIONS[pub_dest_name].get(lookup, '')
     if isinstance(lookup_value, str) :
         if lookup_value == 'False':
@@ -118,6 +119,12 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             status= 400
             return jsonify({'error': msg}), status
 
+        # get indicator if db config is to be mounted (true/false)
+        SET_DB_CONFIG, msg= pub_dest(inputData, 'setConnCheckStmt')
+        if msg:
+            status= 400
+            return jsonify({'error': msg}), status
+
         # get container registry from publishing destination
         container_registry, msg= pub_dest(inputData, 'registry')
         if msg:
@@ -162,6 +169,14 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
             db_secret_mount= '        - name: scr-db-secrets\n          mountPath: /opt/scr/secrets/db'
             db_secret_volume= f'      - name: scr-db-secrets\n        secret:\n          secretName: {db_secret_name}\n          items:\n          - key: db.secrets\n            path: db.secrets'
 
+        # set the db config name. It is: db-config-<pub_dest_name>
+        db_config_name= f'db-config-{pub_dest_name}'.lower()
+        db_config_mount= ''
+        db_config_volume= ''
+        if SET_DB_CONFIG:
+            db_config_mount= '        - name: scr-db-config\n          mountPath: /opt/scr/config/db'
+            db_config_volume= f'      - name: scr-db-config\n        configMap:\n          name: {db_config_name}\n          items:\n          - key: db.config\n            path: db.config'
+
         # Open yaml template and replace placeholders
         with open('./template/scr-template.yaml', 'r') as file:
             yaml_template= file.read()
@@ -178,6 +193,8 @@ def create_blueprint(base_url, k8s_scr_mgr_version):
         yaml_content= yaml_content.replace('<ENV-VARS>', env)
         yaml_content= yaml_content.replace('<DB-SECRET-MOUNT>', db_secret_mount)
         yaml_content= yaml_content.replace('<DB-SECRET-VOLUME>', db_secret_volume)
+        yaml_content= yaml_content.replace('<DB-CONFIG-MOUNT>', db_config_mount)
+        yaml_content= yaml_content.replace('<DB-CONFIG-VOLUME>', db_config_volume)
         yaml_content= yaml_content.replace('<SCR-ENDPOINT>', SCR_ENDPOINT)
         yaml_content= yaml_content.replace('<DOCKER-PULL-SECRET>', docker_pull_secret)
         yaml_content= yaml_content.replace('<REPLICAS>', REPLICAS)

@@ -1,0 +1,18 @@
+{{- $ns := "" -}}
+{{- range $i, $item := .Values.scr }}
+  {{- if $item.setConnCheckStmt }}
+    {{- $namespace := $ns -}}
+    {{- $ConnCheckStmt := $item.setConnCheckStmt }}
+    {{- $db_config_name := (printf "db-config%s" $item.publishingDestination | lower | replace " " "-" | trunc 63) -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $db_config_name | quote }}
+  namespace: {{ $namespace | quote }}
+data:
+  db.config: 
+	  connectionCheckStatement: {{$ConnCheckStmt}}
+  
+  {{- end }}
+{{- end }}
